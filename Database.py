@@ -2,7 +2,7 @@ import sqlite3
 
 # Step 0 Data Preparation
 # Create a database
-connection = sqlite3.connect('Lesson2.db')
+connection = sqlite3.connect('ClientsDataManagment.db')
 cur = connection.cursor()
 # Create table
 cur.execute('''CREATE TABLE users ( username varchar(30), admin boolean);''')
