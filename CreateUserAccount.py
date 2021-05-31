@@ -5,7 +5,7 @@ from ClientsDataManagementSystem.LoginUser import LoginUser
 from ClientsDataManagementSystem.RegisterNewUser import RegisterNewUser
 
 
-class CreateUserAccount:
+class CreateUserOrLogin:
 
 
 

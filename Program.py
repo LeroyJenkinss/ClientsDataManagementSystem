@@ -1,8 +1,8 @@
 import sqlite3
 
-from ClientsDataManagementSystem.CreateUserAccount import CreateUserAccount
+from ClientsDataManagementSystem.CreateUserAccount import CreateUserOrLogin
 
-createuseraccount = CreateUserAccount().tableEntries()
+createuserorlogin = CreateUserOrLogin().tableEntries()
 
 
 
