@@ -1,7 +1,20 @@
-class CreateUserAccount:
-    message = Console('Plz enter your new Username ');
-    message
-    if len(message) > 15 || len(message) < 5:
-        Console('Your name is too short')
+import sys
 
-    message
+from pip._vendor.distlib.compat import raw_input
+from ClientsDataManagementSystem.LoginUser import LoginUser
+from ClientsDataManagementSystem.RegisterNewUser import RegisterNewUser
+
+
+class CreateUserAccount:
+
+
+
+    def tableEntries(self):
+        question1 = raw_input('Hello \nWould you like to login or register? (plz answer with login or register )')
+        if(question1.lower().strip() == 'login'):
+            LoginUser().login()
+
+        elif(question1.lower().strip() == 'register'):
+            RegisterNewUser().registerUser()
+
+
