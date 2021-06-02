@@ -14,6 +14,7 @@ class Program:
     encryptingdata = EncryptingDb().encrypt('ccr', 24)
     print(encryptingdata)
     # Het decoden moet met 26 - steps
+    # number of steps should be written to a file calles secret steps
 
 
 
