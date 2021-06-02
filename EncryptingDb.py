@@ -5,38 +5,25 @@ from cryptography.fernet import Fernet
 
 class EncryptingDb():
 
-    key = ''
-    def generate_key(self):
-        """
-        Generates a key and save it into a file
-        """
-        key = Fernet.generate_key()
-        with open("secret.key", "wb") as key_file:
-            key_file.write(key)
+    def encrypt(self,text, s):
+        result = ""
 
-    def load_key(self):
-        """
-        Loads the key named `secret.key` from the current directory.
-        """
-        return open("secret.key", "rb").read()
+        # traverse text
+        for i in range(len(text)):
+            char = text[i]
 
-    def encrypt_message(self,message):
-        """
-        Encrypts a message
-        """
-        key = self.load_key()
-        encoded_message = message.encode()
-        f = Fernet(key)
-        encrypted_message = f.encrypt(encoded_message)
+            # Encrypt uppercase characters
+            if (char.isupper()):
+                result += chr((ord(char) + s - 65) % 26 + 65)
 
-        print(encrypted_message)
+            # Encrypt lowercase characters
+            else:
+                result += chr((ord(char) + s - 97) % 26 + 97)
 
-    def decrypt_message(self,encrypted_message):
-        """
-        Decrypts an encrypted message
-        """
-        key = self.load_key()
-        f = Fernet(key)
-        decrypted_message = f.decrypt(encrypted_message)
+        return result
 
-        print(decrypted_message.decode())
+
+
+
+
+    print()

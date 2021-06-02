@@ -7,12 +7,14 @@ from ClientsDataManagementSystem.CreateUserAccount import CreateUserOrLogin
 class Program:
 
     # createuserorlogin = CreateUserOrLogin().tableEntries()
-    if os.path.isfile('secret.key'):
-        print('key already present')
-    else:
-        encryptingdata = EncryptingDb().generate_key()
 
-    
+
+    encryptingdata = EncryptingDb().encrypt('aap', 2)
+    print(encryptingdata)
+    encryptingdata = EncryptingDb().encrypt('ccr', 24)
+    print(encryptingdata)
+    # Het decoden moet met 26 - steps
+
 
 
 
