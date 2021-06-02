@@ -30,7 +30,7 @@ class RegisterNewUser:
                 self.entryList["City"] = City
                 self.entryList["EmailAddress"] = EmailAddress
                 self.entryList["MobilePhone"] = MobilePhone
-            
+
 
 
 
