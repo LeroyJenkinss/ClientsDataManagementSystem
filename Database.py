@@ -5,10 +5,10 @@ import sqlite3
 connection = sqlite3.connect('ClientsDataManagment.db')
 cur = connection.cursor()
 # Create table
-cur.execute('''CREATE TABLE users ( FullName varchar(30),Address varchar(40),ZipCode varchar(6),City varchar(40),EmailAddress varchar(30),MobilePhone integer(10),admin boolean);''')
-
+cur.execute('''CREATE TABLE clients ( FullName varchar(30),Address varchar(40),ZipCode varchar(6),City varchar(40),EmailAddress varchar(30),MobilePhone integer(10));''')
+cur.execute('''CREATE TABLE users ( UserName varchar(30),Password varchar(40), type varchar(30));''')
 # Insert a row of data
-cur.execute("INSERT INTO users ( FullName, Address, ZipCode, City, EmailAddress, MobilePhone, admin) VALUES ('Piet', 'kalverstraat 80', '3010AB','Rotterdam','abc@hallo.com',0612345678,false);")
+cur.execute("INSERT INTO users ( UserName, Password, type) VALUES ('master', 'password', 'SuperAdmin');")
 
 # Save (commit) the changes
 connection.commit()
