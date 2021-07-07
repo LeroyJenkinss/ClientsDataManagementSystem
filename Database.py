@@ -77,26 +77,60 @@ class db:
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
             print("Login failed")
-        else:
             self.loggedin = 1
             self.loggedin_user = username
             self.admin_is_loggedin = loggedin_user[3]
             user_type = 'Admin' if self.admin_is_loggedin == 1 else 'Not Admin'
-            print('\n\n\n\nWelcome')
-            heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄'  + '\n'   + \
-                      '▍ '                                           + '\n'   + \
-                      '▍ Username: ' + colored(self.loggedin_user, 'red')   + '\n'   + \
-                      '▍ '                                           + '\n'   + \
-                      '▍ User type: ' + colored(user_type, 'red')    + '\n'   + \
-                      '▍ '                                           + '\n'   + \
-                      '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀'  + '\n'   + \
-                      'User Menu'
-            
-            db_interface = user_interface(heading, db_menu)
-            db_interface.run()
-            del db_interface
+            if self.admin_is_loggedin == 0:
+                user_type = 'Advisor'
+                print('\n\n\n\nWelcome')
+                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄'  + '\n'   + \
+                          '▍ '                                           + '\n'   + \
+                          '▍ Username: ' + colored(self.loggedin_user, 'red')   + '\n'   + \
+                          '▍ '                                           + '\n'   + \
+                          '▍ User type: ' + colored(user_type, 'red')    + '\n'   + \
+                          '▍ '                                           + '\n'   + \
+                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀'  + '\n'   + \
+                          'User Menu'
+
+                db_interface = user_interface(heading, db_menu_advisor)
+                db_interface.run()
+                del db_interface
+            elif self.admin_is_loggedin == 2:
+                user_type = 'System Administrator'
+                print('\n\n\n\nWelcome')
+                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                          'User Menu'
+
+                db_interface = user_interface(heading, db_menu_system_admin)
+                db_interface.run()
+                del db_interface
+            elif self.admin_is_loggedin == 3:
+                user_type = 'Super Administrator'
+                print('\n\n\n\nWelcome')
+                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                          'User Menu'
+
+                db_interface = user_interface(heading, db_menu_super_admin)
+                db_interface.run()
+                del db_interface
 
     def show_all_clients(self):
+        self.not_implemented(self.show_all_clients)
+
+    def search_client(self, client):
         self.not_implemented(self.show_all_clients)
 
     def show_all_users(self):
@@ -112,6 +146,9 @@ class db:
         self.not_implemented(self.make_a_user_admin)       
 
     def delete_client(self):
+        self.not_implemented(self.delete_client)
+
+    def modify_client(self):
         self.not_implemented(self.delete_client)
 
     def delete_user(self):
@@ -136,7 +173,15 @@ def escape_sql_meta(sql_query):
 
 client = db(company_db_name, client_tb_name, users_tb_name,db_key)
 main_menu = [[1, 'login', client.login ], [0, 'Exit', client.close]]
-db_menu = [ [1, 'show all clients', client.show_all_clients], [2, 'show all users', client.show_all_users], \
+db_menu_advisor = [ [1, 'change password', client.change_password], [2, 'add new client', client.add_new_client], \
+            [3, 'show all clients', client.show_all_clients], [4, 'search for client', client.search_client], \
+            [5, 'modify a client', client.modify_client], [0, 'logout', client.logout]]
+db_menu_system_admin = [ [1, 'show all clients', client.show_all_clients], [2, 'show all users', client.show_all_users], \
+            [3, 'add new client', client.add_new_client], [4, 'add new user', client.add_new_user], \
+            [5, 'make a user "admin"', client.make_a_user_admin], \
+            [6, 'delete a client', client.delete_client], [7, 'delete a user', client.delete_user], \
+            [8, 'change password', client.change_password], [0, 'logout', client.logout]]
+db_menu_super_admin = [ [1, 'show all clients', client.show_all_clients], [2, 'show all users', client.show_all_users], \
             [3, 'add new client', client.add_new_client], [4, 'add new user', client.add_new_user], \
             [5, 'make a user "admin"', client.make_a_user_admin], \
             [6, 'delete a client', client.delete_client], [7, 'delete a user', client.delete_user], \
