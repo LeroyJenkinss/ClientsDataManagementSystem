@@ -1,5 +1,7 @@
 from ui import *
-from database import * 
+from Database import *
+
+
 
 main_heading = '''
 ██████████████████████████████████████████████
