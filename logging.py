@@ -1,6 +1,6 @@
 from datetime import datetime
 from time import localtime, strftime
-import Database as db
+import Database
 import EncryptingDb
 
 class logging:
@@ -14,13 +14,16 @@ class logging:
         self.additionalInfo = self(additionalInfo)
         self.supicious = self(supicious)
 
+        Database.db().insertLoggingInDB(self.username,self.date,self.time,self.description_of_activity,self.additionalInfo,self.supicious)
+
+
 
 
     def encrypt(self,value):
         return EncryptingDb.EncryptingDb().encrypt(value)
 
-    def insertIntoDb(self,value):
-        return
+
+
 
 
 

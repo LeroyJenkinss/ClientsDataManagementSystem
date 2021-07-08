@@ -1,6 +1,6 @@
 
 
-class EncryptingDb():
+class EncryptingDb:
 
     def encrypt(self,text, s):
         result = ""

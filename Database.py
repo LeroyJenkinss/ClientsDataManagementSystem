@@ -64,6 +64,16 @@ class db:
         except: 
             None
 
+        # create logging table if it doesnt excist
+        # sqlite3 doesnt have datetime or boolean(0 = false, 1 = true), date and time are strings and boolean is iteger
+        tb_create = "CREATE TABLE logging (username TEXT, date TEXT, time TEXT, description_of_activity TEXT, additionalInfo TEXT, supicious INTEGER)"
+        try:
+            self.cur.execute(tb_create)
+            self.cur.execute( "INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('Billy', '30-10-1979', '19:28:00', 'log on', 0)")
+            self.conn.commit()
+        except:
+            None
+
     def login(self):
         username = input("please enter username: ").lower()
         password = input("please enter password: ")
@@ -167,7 +177,14 @@ class db:
 
     def not_implemented(self, func):
         print(func.__name__ + ' method is Not implemented')
-    
+
+    def see_loggingFile(self):
+        return
+
+    def insertLoggingInDB(self,username, date, time, description_of_activity, additionalInfo, supicious):
+        sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES (date, time, description_of_activity, additionalInfo, supicious)"
+        self.cur.execute(sql_statement)
+
 def escape_sql_meta(sql_query):
     pass
 

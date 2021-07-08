@@ -1,5 +1,7 @@
 from ui import *
 from Database import *
+import Database
+import EncryptingDb
 
 
 
@@ -14,6 +16,7 @@ main_heading = '''
 
 
 Main Menu'''
+
 
 main_interface = user_interface(main_heading, menueitems = main_menu)
 
