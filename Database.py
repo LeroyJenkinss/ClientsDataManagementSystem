@@ -19,6 +19,68 @@ lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
 uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 
+# uginput class
+class uginput:
+    def __init__(self, domain_type=str, min_len=None, max_len=None, range=None):
+        self.domain_type = domain_type
+        self.min_len = min_len
+        self.max_len = max_len
+        self.range = range
+
+    def _isValidUsername(self):
+        if self.value is None:
+            logging.logging('None', 'checking_username', 'username has null value', '1')
+            return False
+        symbols_premitted = ['!', '.', '_']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+        white_list.extend(symbols_premitted)
+        white_list.extend(self.min_len)
+        white_list.extend(self.max_len)
+
+        if self.value:
+            valid = [
+                self.value[0] in lowercase_letters,
+                self._length(self.min_len, self.max_len),
+                self._checkwhitelist(white_list)]
+            return all(valid)
+        else:
+            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            return False
+    def _isValidPassword(self):
+        if self.value is None:
+            logging.logging('None', 'checking_password', 'password has null value', '1')
+            return False
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')', '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+        white_list.extend(symbols_premitted)
+        white_list.extend(self.min_len)
+        white_list.extend(self.max_len)
+        def check(self):
+            return any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in self.digits)) and (any(x for x in self.symbols_premitted))
+        if self.check and self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checkwhitelist(white_list)]
+
+            return all(valid)
+        else:
+            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            return False
+
+
+    def isValid(self):
+        domain_func = {
+            'username': self._isValidUsername,
+            'password': self._isValidPassword,
+            'email': self._isValidEmail
+        }
+        return(domain_func[self.domain_type]())
 
 # User
 # --------------------------------------------------------------------
@@ -97,9 +159,12 @@ class db:
         if not username.isValid():
             print('username or password is incorrect')
             return
+
+        password = uginput('password', 8, 30)
         if not password.isValid():
             print('username or password is incorrect')
             return
+
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{username}" AND password="{password}"'
@@ -211,49 +276,6 @@ class db:
         zipObj.close()
 
 
-class uginput:
-    def __init__(self, domain_type=str, min_len=None, max_len=None, range=None):
-        self.domain_type = domain_type
-        self.min_len = min_len
-        self.max_len = max_len
-        self.range = range
-
-    def _isValidUsername(self):
-        if self.value is None:
-            logging.logging('None', 'checking_username', 'username has null value', '1')
-            return False
-        symbols_premitted = ['!', '.', '_']
-        white_list = []
-        white_list.extend(lowercase_letters)
-        white_list.extend(uppercase_letters)
-        white_list.extend(digits)
-        white_list.extend(symbols_premitted)
-        white_list.extend(self.min_len)
-        white_list.extend(self.max_len)
-
-        if self.value:
-            valid = [
-                self.value[0] in lowercase_letters,
-                self._lenght(self.min_len, self.max_len),
-                self._checkwhitelist(white_list)]
-            return all(valid)
-        else:
-            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
-            return False
-    def _isValidPassword(self):
-        if self.value is None:
-            logging.logging('None', 'checking_password', 'password has null value', '1')
-            return False
-        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')', '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
-        white_list = []
-
-    def isValid(self):
-        domain_func = {
-            'username': self._isValidUsername,
-            'password': self._isValidPassword,
-            'email': self._isValidEmail
-        }
-        return(domain_func[self.domain_type]())
 
     def add_new_advisor(self):
         self.not_implemented(self.add_new_advisor)
