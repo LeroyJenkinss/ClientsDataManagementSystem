@@ -6,7 +6,7 @@ import EncryptingDb
 class logging:
 
 
-    def __init__(self,username, date, time, description_of_activity, additionalInfo, supicious):
+    def __init__(self,username, description_of_activity, additionalInfo, supicious):
         self.username =  self.encrypt(username)
         self.date = self.encrypt(datetime.strftime('%Y-%m-%d'))
         self.time = self.encrypt(strftime("%H:%M:%S", localtime()))
