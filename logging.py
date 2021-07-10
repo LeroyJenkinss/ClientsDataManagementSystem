@@ -11,10 +11,12 @@ class logging:
         self.date = self.encrypt(datetime.strftime('%Y-%m-%d'))
         self.time = self.encrypt(strftime("%H:%M:%S", localtime()))
         self.description_of_activity = self.encrypt(description_of_activity)
-        self.additionalInfo = self(additionalInfo)
-        self.supicious = self(supicious)
+        self.additionalInfo = self.encrypt(additionalInfo)
+        self.supicious = self.encrypt(supicious)
 
         Database.db().insertLoggingInDB(self.username,self.date,self.time,self.description_of_activity,self.additionalInfo,self.supicious)
+
+
 
 
 

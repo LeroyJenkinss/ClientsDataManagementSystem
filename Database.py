@@ -19,13 +19,15 @@ lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
 uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 
+
 # uginput class
 class uginput:
-    def __init__(self, domain_type=str, min_len=None, max_len=None, range=None):
-        self.domain_type = domain_type
+    def __init__(self, domain_type: str, min_len=None, max_len=None, range=None):
+
         self.min_len = min_len
         self.max_len = max_len
         self.range = range
+        self.domain_type = domain_type
 
     def _isValidUsername(self):
         if self.value is None:
@@ -37,23 +39,44 @@ class uginput:
         white_list.extend(uppercase_letters)
         white_list.extend(digits)
         white_list.extend(symbols_premitted)
-        white_list.extend(self.min_len)
-        white_list.extend(self.max_len)
 
         if self.value:
             valid = [
-                self.value[0] in lowercase_letters,
+                self[0] in lowercase_letters,
                 self._length(self.min_len, self.max_len),
                 self._checkwhitelist(white_list)]
             return all(valid)
         else:
             logging.logging(self.value, 'checking_username', 'username is not valid', '1')
             return False
+
+    def check(self):
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
+
+        return any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (
+            any(x for x in digits)) and (any(x for x in symbols_premitted))
+
+    def _checkwhitelist(self, white_list):
+        for a in self.value:
+            if a not in white_list:
+                return False
+
+    def input(self, question):
+        self.value = input(question)
+
+
+    def _length(self, min=0, max=64):
+        self.min = min
+        self.max = max
+
     def _isValidPassword(self):
         if self.value is None:
             logging.logging('None', 'checking_password', 'password has null value', '1')
             return False
-        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')', '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
         white_list = []
         white_list.extend(lowercase_letters)
         white_list.extend(uppercase_letters)
@@ -61,8 +84,7 @@ class uginput:
         white_list.extend(symbols_premitted)
         white_list.extend(self.min_len)
         white_list.extend(self.max_len)
-        def check(self):
-            return any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in self.digits)) and (any(x for x in self.symbols_premitted))
+
         if self.check and self.value:
             valid = [
                 self._length(self.min_len, self.max_len),
@@ -73,14 +95,16 @@ class uginput:
             logging.logging(self.value, 'checking_username', 'username is not valid', '1')
             return False
 
-
     def isValid(self):
         domain_func = {
             'username': self._isValidUsername,
             'password': self._isValidPassword,
-            'email': self._isValidEmail
+            # 'email': self._isValidEmail
         }
-        return(domain_func[self.domain_type]())
+
+        methodCall = (domain_func[self.domain_type]())
+        return methodCall
+
 
 # User
 # --------------------------------------------------------------------
@@ -151,16 +175,16 @@ class db:
             None
 
     def login(self):
-        username = encryption.encrypt(input("please enter username: "))
-        password = encryption.encrypt(input("please enter password: "))
 
         username = uginput('username', 5, 12)
         username.input('please enter username:')
+        print("hallo")
         if not username.isValid():
             print('username or password is incorrect')
             return
 
         password = uginput('password', 8, 30)
+        password.input('please enter password:')
         if not password.isValid():
             print('username or password is incorrect')
             return
@@ -274,8 +298,6 @@ class db:
         zipObj.write('mycompany.db')
         # close the Zip File
         zipObj.close()
-
-
 
     def add_new_advisor(self):
         self.not_implemented(self.add_new_advisor)
