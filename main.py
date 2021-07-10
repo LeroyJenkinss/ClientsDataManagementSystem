@@ -1,6 +1,5 @@
 from ui import *
 from Database import *
-import Database
 import EncryptingDb
 
 
