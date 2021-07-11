@@ -5,6 +5,7 @@ import EncryptingDb
 from zipfile import ZipFile
 from datetime import datetime
 from tabulate import tabulate
+import logging
 
 # GLobal Variables
 # --------------------------------------------------------------------
@@ -14,16 +15,118 @@ client_tb_name = 'client'
 users_tb_name = 'users'
 encryption = EncryptingDb.EncryptingDb()
 now = datetime.now()
+lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
+uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
+digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
+
+
+# uginput class
+class uginput:
+    def __init__(self, domain_type: str, min_len=None, max_len=None, range=None):
+
+        self.min_len = min_len
+        self.max_len = max_len
+        self.range = range
+        self.domain_type = domain_type
+
+    def _isValidUsername(self):
+        if self.value is None:
+            logging.logging('None', 'checking_username', 'username has null value', '1')
+            return False
+        symbols_premitted = ['!', '.', '_']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+        white_list.extend(symbols_premitted)
+
+        print(self.value[0])
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checkFirstChar(self.value[0],lowercase_letters,uppercase_letters),
+                self._checkwhitelist(white_list)]
+            return all(valid)
+        else:
+            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            return False
+
+    def _check(self):
+        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in digits)) and (any(x for x in symPremitted)):
+            return True
+        return False
+        print('hellloooooo')
+
+    def _checkwhitelist(self, white_list):
+        for a in self.value:
+            if a not in white_list:
+                return False
+        return True
+
+    def input(self, question):
+        self.value = input(question)
+
+
+    def _length(self, min=0, max=64):
+        name = self.value
+        if min <= len(name) <= max:
+            return True
+        return False
+
+    def _checkFirstChar(self,char2Check,lowerLetters,upperLetters):
+        if char2Check  in lowerLetters:
+            return True
+        elif char2Check in upperLetters:
+            return  True
+        else:
+            return False
+
+    def _isValidPassword(self):
+        if self.value is None:
+            logging.logging('None', 'checking_password', 'password has null value', '1')
+            return False
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+        white_list.extend(symbols_premitted)
+
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._check(),
+                self._checkwhitelist(white_list)]
+
+
+            return all(valid)
+        else:
+            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            return False
+
+    def isValid(self):
+        domain_func = {
+            'username': self._isValidUsername,
+            'password': self._isValidPassword,
+            # 'email': self._isValidEmail
+        }
+
+        methodCall = (domain_func[self.domain_type]())
+        return methodCall
 
 
 # User
 # --------------------------------------------------------------------
 class user:
     def __init__(self, user_data):
-        self.username = encryption.decrypt(user_data[0])
-        self.password = encryption.decrypt(user_data[1])
-        self.name = encryption.decrypt(user_data[2])
-        self.admin = encryption.decrypt(user_data[3])
+        self.username = user_data[0]
+        self.password = user_data[1]
+        self.name = user_data[2]
+        self.admin = user_data[3]
+        self.advisor = user_data[4]
 
 # Database
 # --------------------------------------------------------------------
@@ -65,7 +168,7 @@ class db:
             self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')}, {encryption.encrypt('0')})")
             self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')}, {encryption.encrypt('0')})")
             self.conn.commit()
-        except: 
+        except:
             None
 
         # create logging table if it doesnt excist
@@ -79,8 +182,18 @@ class db:
             None
 
     def login(self):
-        username = encryption.encrypt(input("please enter username: "))
-        password = encryption.encrypt(input("please enter password: "))
+
+        username = uginput('username', 5, 12)
+        username.input('please enter username:')
+        if not username.isValid():
+            print('username or password is incorrect')
+            return
+
+        password = uginput('password', 8, 30)
+        password.input('please enter password:')
+        if not password.isValid():
+            print('username or password is incorrect')
+            return
 
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
@@ -395,7 +508,7 @@ class db:
     def see_loggingFile(self):
         return
 
-    def insertLoggingInDB(self,username, date, time, description_of_activity, additionalInfo, supicious):
+    def insertLoggingInDB(self, username, date, time, description_of_activity, additionalInfo, supicious):
         sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES (date, time, description_of_activity, additionalInfo, supicious)"
         self.cur.execute(sql_statement)
 
