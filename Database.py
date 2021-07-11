@@ -202,7 +202,6 @@ class db:
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
-        logging.logging(self.value, 'checking_username', 'username is not valid', '1')
 
 
 
@@ -210,6 +209,7 @@ class db:
 
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
+            logging.logging(username.value, 'attempt_login_failed password = ' + password.value, 'username is not valid', '1')
             print("Login failed")
             self.cur.execute(
                 "SELECT attempts FROM users WHERE username=:username", \
