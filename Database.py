@@ -164,16 +164,13 @@ class db:
             None
 
         # create user table if it does not exist
-        tb_create = "CREATE TABLE users (username TEXT, password TEXT, fullname TEXT, admin varchar);"
+        tb_create = "CREATE TABLE users (username TEXT, password TEXT, fullname TEXT, admin varchar, attempts varchar);"
         try:
             self.cur.execute(tb_create)
             # add sample records to the db manually
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')})")
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')})")
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')})")
+            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')})")
+            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')}, {encryption.encrypt('0')})")
+            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')}, {encryption.encrypt('0')})")
             self.conn.commit()
         except:
             None
@@ -183,8 +180,7 @@ class db:
         tb_create = "CREATE TABLE logging (username TEXT, date TEXT, time TEXT, description_of_activity TEXT, additionalInfo TEXT, supicious varchar)"
         try:
             self.cur.execute(tb_create)
-            self.cur.execute(
-                F"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('{encryption.encrypt('Billy')}', '{encryption.encrypt('30-10-1979')}', '{encryption.encrypt('19:28:00')}', '{encryption.encrypt('log on')}', '{encryption.encrypt('Hassan loggedin')}', {encryption.encrypt('0')})")
+            self.cur.execute( F"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('{encryption.encrypt('Billy')}', '{encryption.encrypt('30-10-1979')}', '{encryption.encrypt('19:28:00')}', '{encryption.encrypt('log on')}', '{encryption.encrypt('Hassan loggedin')}', {encryption.encrypt('0')})")
             self.conn.commit()
         except:
             None
@@ -215,10 +211,39 @@ class db:
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
             print("Login failed")
+            self.cur.execute(
+                "SELECT attempts FROM users WHERE username=:username", \
+                {"username": username})
+
+            attempts = encryption.decrypt(self.cur.fetchone()[0])
+            incrAttempts = f'{(int(attempts)) + 1}'
+
+            self.cur.execute("UPDATE users SET attempts=:attempts WHERE username=:username", \
+                        {"attempts": encryption.encrypt(incrAttempts),    "username": encryption.encrypt(username.value)})
+            self.conn.commit()
 
         else:
+            if (int(encryption.decrypt(loggedin_user[4]))) < 3:
+                self.cur.execute("UPDATE users SET attempts=:attempts WHERE username=:username", \
+                                 {"attempts": encryption.encrypt('0'), "username": username})
+                self.user = user(loggedin_user)
+                self.loggedin = 1
+                self.loggedin_user = encryption.decrypt(username.value)
+                self.admin_is_loggedin =  encryption.decrypt(loggedin_user[3])
+                user_type = 'Admin' if self.admin_is_loggedin == 1 else 'Not Admin'
+                if self.admin_is_loggedin == '0':
+                    user_type = 'Advisor'
+                    print('\n\n\n\nWelcome')
+                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄'  + '\n'   + \
+                              '▍ '                                           + '\n'   + \
+                              '▍ Username: ' + colored(self.loggedin_user, 'red')   + '\n'   + \
+                              '▍ '                                           + '\n'   + \
+                              '▍ User type: ' + colored(user_type, 'red')    + '\n'   + \
+                              '▍ '                                           + '\n'   + \
+                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀'  + '\n'   + \
+                              'User Menu'
             self.loggedin = 1
-            self.loggedin_user = encryption.decrypt(username)
+            self.loggedin_user = encryption.decrypt(username.value)
             self.admin_is_loggedin = encryption.decrypt(loggedin_user[3])
             user_type = 'Admin' if self.admin_is_loggedin == 1 else 'Not Admin'
             if self.admin_is_loggedin == '0':
@@ -233,54 +258,78 @@ class db:
                           '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
                           'User Menu'
 
-                db_interface = user_interface(heading, db_menu_advisor)
-                db_interface.run()
-                del db_interface
-            elif self.admin_is_loggedin == '1':
-                user_type = 'System Administrator'
-                print('\n\n\n\nWelcome')
-                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
-                          'User Menu'
+                    db_interface = user_interface(heading, db_menu_advisor)
+                    db_interface.run()
+                    del db_interface
+                elif self.admin_is_loggedin == '1':
+                    user_type = 'System Administrator'
+                    print('\n\n\n\nWelcome')
+                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                              'User Menu'
 
-                db_interface = user_interface(heading, db_menu_system_admin)
-                db_interface.run()
-                del db_interface
-            elif self.admin_is_loggedin == '2':
-                user_type = 'Super Administrator'
-                print('\n\n\n\nWelcome')
-                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
-                          '▍ ' + '\n' + \
-                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
-                          'User Menu'
+                    db_interface = user_interface(heading, db_menu_system_admin)
+                    db_interface.run()
+                    del db_interface
+                elif self.admin_is_loggedin == '2':
+                    user_type = 'Super Administrator'
+                    print('\n\n\n\nWelcome')
+                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                              'User Menu'
 
-                db_interface = user_interface(heading, db_menu_super_admin)
-                db_interface.run()
-                del db_interface
+                    db_interface = user_interface(heading, db_menu_super_admin)
+                    db_interface.run()
+                    del db_interface
+            else:
+                print('account blocked, take contact with the system administrator to reset your account')
 
     def show_all_clients(self):
         sql_statement = 'SELECT * from client'
         self.cur.execute(sql_statement)
         clients = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(clients)
-        print(tabulate(decryptedList,
-                       headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
-                                'mobile phone number']))
+        print(tabulate(decryptedList, headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address', 'mobile phone number']))
 
     def search_client(self):
-        self.not_implemented(self.show_all_clients)
+        fullName = encryption.encrypt(input("please enter fullname: "))
+        HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
+        zipcode = encryption.encrypt(input("please enter ZipCode: "))
+        self.cur.execute("SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+                         {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+        client =  self.cur.fetchone()
+        decryptedList = encryption.decryptTupleToList(client)
+        print(tabulate([decryptedList], headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address', 'mobile phone number']))
+
+    def select_role(self, users):
+        for u in users:
+            if u[2] == '0':
+                u[2] = 'advisor'
+            elif u[2] == '1':
+                u[2] = 'admin'
+            elif u[2] == '2':
+                u[2] = 'super admin'
+        return users
+
 
     def show_all_users(self):
-        self.not_implemented(self.show_all_users)
+        sql_statement = 'SELECT username, fullname ,admin from users'
+        self.cur.execute(sql_statement)
+        users = self.cur.fetchall()
+        decryptedList = encryption.decryptNestedTupleToNestedList(users)
+        decryptedList = self.select_role(decryptedList)
+        print(tabulate(decryptedList,
+                       headers=['username', 'fullname', 'admin']))
 
     def add_new_client(self):
         fullname = input("please enter fullname: ")
@@ -290,63 +339,182 @@ class db:
         City = input("please enter City: ")
         EmailAddress = input("please enter EmailAddress: ")
         MobilePhone = input("please enter MobilePhone +31-6-: ")
-        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-' + MobilePhone)}')"
-        self.cur.execute(client1)
-
-    def make_a_user_admin(self):
-        self.not_implemented(self.make_a_user_admin)
+        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-'+ MobilePhone)}')"
+        try:
+            self.cur.execute(client1)
+            self.conn.commit()
+            print('client has been added')
+        except:
+            print('Failed to add client')
 
     def delete_client(self):
-        self.not_implemented(self.delete_client)
+        fullName = encryption.encrypt(input("please enter fullname: "))
+        HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
+        zipcode = encryption.encrypt(input("please enter ZipCode: "))
+        try:
+            self.cur.execute("DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+                             {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+            self.conn.commit()
+            print('client has been deleted')
+        except:
+            print('client deletion has failed' )
 
     def modify_client(self):
-        self.not_implemented(self.delete_client)
+        fullName = input("please enter fullname: ")
+        HouseNumber = input("please enter HouseNumber: ")
+        zipcode = input("please enter ZipCode: ")
 
-    def delete_user(self):
-        self.not_implemented(self.delete_user)
+        fullnameNew = input("please enter new fullname: ")
+        StreetAddressNew = input("please enter new StreetAddress: ")
+        HouseNumberNew = input("please enter new HouseNumber: ")
+        ZipCodeNew = input("please enter new ZipCode: ")
+        CityNew = input("please enter new City: ")
+        EmailAddressNew = input("please enter new EmailAddress: ")
+        MobilePhoneNew = input("please enter new MobilePhone +31-6-: ")
+        try:
+            self.cur.execute(
+                "UPDATE client SET fullname=:newFullname, StreetAddress=:newStreetAddress, HouseNumber=:HouseNumberNew, ZipCode=:ZipCodeNew, City=:CityNew, EmailAddress=:EmailAddressNew, MobilePhone=:MobilePhoneNew WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+                {"newFullname": encryption.encrypt(fullnameNew), "newStreetAddress":encryption.encrypt(StreetAddressNew), "HouseNumberNew":encryption.encrypt(HouseNumberNew), "ZipCodeNew":encryption.encrypt(ZipCodeNew),"CityNew":encryption.encrypt(CityNew),"EmailAddressNew": encryption.encrypt(EmailAddressNew),"MobilePhoneNew":encryption.encrypt(MobilePhoneNew), "fullname": encryption.encrypt(fullName), "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
+            self.conn.commit()
+            print('client has been modified')
+        except:
+            print('client modification has failed')
+
+    def delete_user(self, role):
+        username = input("please enter username: ")
+        try:
+            self.cur.execute(
+                "DELETE FROM users WHERE username=:username and admin=:role", \
+                {"username": encryption.encrypt(username), "role": encryption.encrypt(role)})
+            self.conn.commit()
+            print('user has been deleted')
+        except:
+            print('user deletion has failed')
 
     def change_password(self):
-        self.not_implemented(self.change_password)
+        oldPassword = input("please enter old password: ")
+        if(oldPassword == self.user.password):
+            newPassword = input("please enter new password: ")
+            newPasswordRepeated = input("please reenter new password: ")
+            if newPassword == newPasswordRepeated:
+                try:
+                    self.cur.execute(
+                        "UPDATE users SET password=:password, attempts=:attempts WHERE username=:username", \
+                        {"password": encryption.encrypt(newPassword), "attempts":encryption.encrypt('0'), "username": self.user.username})
+                    self.conn.commit()
+                    print('advisor has been modified')
+                except:
+                    print('advisor modification has failed')
+            else:
+                print('password is not the same')
+        else:
+            print('password is not correct')
 
     def backup(self):
         # create a ZipFile object
-        zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M')}.zip", 'w')
+        zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M') }.zip", 'w')
         # Add multiple files to the zip
         zipObj.write('mycompany.db')
         # close the Zip File
         zipObj.close()
 
     def add_new_advisor(self):
-        self.not_implemented(self.add_new_advisor)
-
+        username = input("please enter username: ")
+        password = input("please enter password: ")
+        fullname = input("please enter fullname: ")
+        admin = '0'
+        try:
+            self.cur.execute(
+                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
+            self.conn.commit()
+            print('advisor has been added')
+        except:
+            print('advisor failed to be added')
     def modify_advisor(self):
-        self.not_implemented(self.modify_advisor)
+        oldUsername = input("please enter username: ")
+        username = input("please enter new username: ")
+        password = input("please enter new password: ")
+        fullname = input("please enter new fullname: ")
+        role = '0'
+        try:
+            self.cur.execute(
+                "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
+                {"username": encryption.encrypt(username), "password": encryption.encrypt(password), "fullname": encryption.encrypt(fullname),
+                 "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
+            self.conn.commit()
+            print('advisor has been modified')
+        except:
+            print('advisor modification has failed')
 
     def delete_advisor(self):
-        self.not_implemented(self.delete_advisor)
+        self.delete_user('0')
 
     def reset_advisor_password(self):
-        self.not_implemented(self.reset_advisor_password)
+        advisorName = input("please enter Advisor username: ")
+        password = input("please enter new Advisor password: ")
+        role = '0'
+        try:
+            self.cur.execute(
+                "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
+                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password), "role":encryption.encrypt(role)})
+            self.conn.commit()
+            print('advisor has been modified')
+        except:
+            print('advisor password reset has failed')
+
 
     def add_new_admin(self):
-        self.not_implemented(self.add_new_admin)
+        username = input("please enter username: ")
+        password = input("please enter password: ")
+        fullname = input("please enter fullname: ")
+        admin = '1'
+        try:
+            self.cur.execute(
+                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
+            self.conn.commit()
+            print('admin has been added')
+        except:
+            print('admin failed to be added')
 
     def modify_admin(self):
-        self.not_implemented(self.modify_admin)
+        oldUsername = input("please enter username: ")
+        username = input("please enter new username: ")
+        password = input("please enter new password: ")
+        fullname = input("please enter new fullname: ")
+        role = '1'
+        try:
+            self.cur.execute(
+                "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
+                {"username": encryption.encrypt(username), "password": encryption.encrypt(password), "fullname": encryption.encrypt(fullname),
+                 "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
+            self.conn.commit()
+            print('admin has been modified')
+        except:
+            print('admin modification has failed')
 
     def delete_admin(self):
-        self.not_implemented(self.delete_admin)
+        self.delete_user('1')
 
     def reset_admin_password(self):
-        self.not_implemented(self.reset_admin_password)
+        advisorName = input("please enter Advisor username: ")
+        password = input("please enter new Advisor password: ")
+        role = '1'
+        try:
+            self.cur.execute(
+                "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
+                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password),
+                 "role": encryption.encrypt(role)})
+            self.conn.commit()
+            print('admin password has been modified')
+        except:
+            print('admin password reset has failed')
 
     def read_logs(self):
         sql_statement = 'SELECT * from logging'
         self.cur.execute(sql_statement)
         log = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(log)
-        print(tabulate(decryptedList,
-                       headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
+        print(tabulate(decryptedList, headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
 
     def logout(self):
         self.loggedin = 0
@@ -366,34 +534,31 @@ class db:
         sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES (date, time, description_of_activity, additionalInfo, supicious)"
         self.cur.execute(sql_statement)
 
-    def escape_sql_meta(sql_query):
-        pass
-
+def escape_sql_meta(sql_query):
+    pass
 
 client = db(company_db_name, client_tb_name, users_tb_name)
-main_menu = [[1, 'login', client.login], [0, 'Exit', client.close]]
-db_menu_advisor = [[1, 'change password', client.change_password], [2, 'add new client', client.add_new_client], \
-                   [3, 'show all clients', client.show_all_clients], [4, 'search for client', client.search_client], \
-                   [5, 'modify a client', client.modify_client], [0, 'logout', client.logout]]
+main_menu = [[1, 'login', client.login ], [0, 'Exit', client.close]]
+db_menu_advisor = [ [1, 'change password', client.change_password], [2, 'add new client', client.add_new_client], \
+            [3, 'search for client', client.search_client], \
+            [4, 'modify a client', client.modify_client], [0, 'logout', client.logout]]
 
-db_menu_system_admin = [[1, 'change password', client.change_password], [2, 'show all users', client.show_all_users], \
-                        [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
-                        [5, 'delete a client', client.delete_client], [6, 'delete a user', client.delete_user], \
-                        [7, 'modify advisor', client.modify_advisor], [8, 'delete a advisor', client.delete_advisor], \
-                        [9, 'reset advisor password', client.reset_advisor_password],
-                        [10, 'read logs', client.read_logs], \
-                        [11, 'modify a client', client.modify_client], [12, 'delete client', client.delete_client], \
-                        [13, 'search for client', client.search_client], \
-                        [14, 'make backup', client.backup], [0, 'logout', client.logout]]
+db_menu_system_admin = [ [1, 'change password', client.change_password], [2, 'show all users', client.show_all_users], \
+            [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
+            [5, 'delete a client', client.delete_client],\
+            [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
+            [8, 'reset advisor password', client.reset_advisor_password], [9, 'read logs', client.read_logs], \
+            [10, 'modify a client', client.modify_client],\
+            [11, 'search for client', client.search_client], \
+            [12, 'make backup', client.backup], [0, 'logout', client.logout]]
 
 db_menu_super_admin = [[1, 'show all clients', client.show_all_clients], [2, 'show all users', client.show_all_users], \
-                       [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
-                       [5, 'delete a client', client.delete_client], [6, 'delete a user', client.delete_user], \
-                       [7, 'modify advisor', client.modify_advisor], [8, 'delete a advisor', client.delete_advisor], \
-                       [9, 'reset advisor password', client.reset_advisor_password],
-                       [10, 'read logs', client.read_logs], \
-                       [11, 'modify a client', client.modify_client], [12, 'delete client', client.delete_client], \
-                       [13, 'search for client', client.search_client], [14, 'add new admin', client.add_new_admin], \
-                       [15, 'modify admin', client.modify_admin], [16, 'delete a admin', client.delete_admin], \
-                       [17, 'reset admin password', client.reset_admin_password],
-                       [18, 'make backup', client.backup], [0, 'logout', client.logout]]
+            [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
+            [5, 'delete a client', client.delete_client], \
+            [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
+            [8, 'reset advisor password', client.reset_advisor_password], [9, 'read logs', client.read_logs], \
+            [10, 'modify a client', client.modify_client],
+            [11, 'search for client', client.search_client], [12, 'add new admin', client.add_new_admin], \
+            [13, 'modify admin', client.modify_admin], [14, 'delete a admin', client.delete_admin], \
+            [15, 'reset admin password', client.reset_admin_password],
+            [16, 'make backup', client.backup], [0, 'logout', client.logout]]
