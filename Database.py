@@ -1,4 +1,6 @@
 import sqlite3
+from sqlite3.dbapi2 import Connection
+
 from ui import *
 from termcolor import colored
 import EncryptingDb
@@ -50,7 +52,7 @@ class uginput:
         if self.value is None:
             logging(db,self.value, 'checking_username', 'username has null value', '1')
             return False
-        logging(db,self.value, 'checking_username', 'username has null value', '1')
+
         symbols_premitted = ['!', '.', '_']
         white_list = []
         white_list.extend(lowercase_letters)
@@ -152,6 +154,8 @@ class user:
 # Database
 # --------------------------------------------------------------------
 class db:
+    conn: Connection
+
     def __init__(self, db_name, client_table_name, users_table_name):
         self.db_name = db_name
         self.client_table_name = client_table_name
@@ -369,7 +373,9 @@ class db:
             self.cur.execute(client1)
             self.conn.commit()
             print('client has been added')
+            logging(db, self.user.username, 'added new client', 'added ' + fullname, 0)
         except:
+            logging(db, self.user.username, 'trying to add new client but failed','tried to add ' + fullname, 1)
             print('Failed to add client')
 
     def delete_client(self):
@@ -382,7 +388,9 @@ class db:
                 {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
             self.conn.commit()
             print('client has been deleted')
+            logging(db, self.user.username, 'client has been deleted', 'client name ' + fullName+ ' '+'client house number '+HouseNumber+' '+'client zipcode '+zipcode, 0)
         except:
+            logging(db, self.user.username, 'trying to delete client but failed','tried to delete ' + fullName, 1)
             print('client deletion has failed')
 
     def modify_client(self):
@@ -408,7 +416,9 @@ class db:
                  "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
             self.conn.commit()
             print('client has been modified')
+            logging(db, self.user.username, 'client has been modified', 'modified values' + fullnameNew+' '+StreetAddressNew+' '+HouseNumberNew+' '+ZipCodeNew+' '+CityNew+' '+EmailAddressNew+' '+MobilePhoneNew, 0)
         except:
+            logging(db, self.user.username, 'trying to modify account','tried to modify ' + fullName, 1)
             print('client modification has failed')
 
     def delete_user(self, role):
@@ -418,8 +428,10 @@ class db:
                 "DELETE FROM users WHERE username=:username and admin=:role", \
                 {"username": encryption.encrypt(username), "role": encryption.encrypt(role)})
             self.conn.commit()
+            logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username, 0)
             print('user has been deleted')
         except:
+            logging(db, self.user.username, 'trying to delete user but failed','tried to delete ' + username, 1)
             print('user deletion has failed')
 
     def change_password(self):
@@ -436,18 +448,23 @@ class db:
                     self.conn.commit()
                     print('advisor has been modified')
                 except:
+                    logging(db,self.user.username,'trying to change user password','tried to change pw to from '+oldPassword+' to '+newPassword, 1)
                     print('advisor modification has failed')
             else:
+                logging(db, self.user.username, 'trying to change user password','password is not the same', 0)
                 print('password is not the same')
         else:
+            logging(db, self.user.username, 'trying to change user password','tried pw '+oldPassword+' is not the same as the tried on '+self.user.password, 1)
             print('password is not correct')
 
     def backup(self):
         # create a ZipFile object
         zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M')}.zip", 'w')
         # Add multiple files to the zip
+        logging(db, self.user.username, 'made backup','made backup ' + 'null', 0)
         zipObj.write('mycompany.db')
         # close the Zip File
+
         zipObj.close()
 
     def add_new_advisor(self):
@@ -459,8 +476,10 @@ class db:
             self.cur.execute(
                 F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
             self.conn.commit()
+            logging(db, self.user.username, 'added new advisor','new values username '+username+' fullname '+fullname,0)
             print('advisor has been added')
         except:
+            logging(db, self.user.username, 'failed adding new advisor','new values username ' + username + ' fullname ' + fullname, 1)
             print('advisor failed to be added')
 
     def modify_advisor(self):
@@ -476,8 +495,10 @@ class db:
                  "fullname": encryption.encrypt(fullname),
                  "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
             self.conn.commit()
+            logging(db, self.user.username, 'modified advisor','values modified are oldUsername' + oldUsername +' to '+username+ ' fullname ' + fullname, 0)
             print('advisor has been modified')
         except:
+            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldUsername + ' to ' + username + ' fullname ' + fullname, 0)
             print('advisor modification has failed')
 
     def delete_advisor(self):
@@ -553,7 +574,7 @@ class db:
                        headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
 
     def insertLoggingInDB(db,username, date, time, description_of_activity, additionalinfo, suspicious):
-        sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious})"
+        sql_statement = F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious})"
         db.cur.execute(sql_statement)
         db.conn.commit()
 
