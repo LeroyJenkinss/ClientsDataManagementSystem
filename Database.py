@@ -570,13 +570,6 @@ class db:
         print(tabulate(decryptedList,
                        headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
 
-    def insertLoggingInDB(db,username, date, time, description_of_activity, additionalinfo, suspicious):
-        print(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')")
-        # sql_statement = F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')"
-        # print(sql_statement)
-        db.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}','{date}','{time}','{description_of_activity}','{additionalinfo}','{suspicious}')")
-        db.conn.commit()
-
     def logout(self):
         self.loggedin = 0
         self.loggedin_user = None
