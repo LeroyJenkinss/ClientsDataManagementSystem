@@ -213,7 +213,7 @@ class db:
             print("Login failed")
             self.cur.execute(
                 "SELECT attempts FROM users WHERE username=:username", \
-                {"username": username})
+                {"username": encryption.encrypt(username.value)})
 
             attempts = encryption.decrypt(self.cur.fetchone()[0])
             incrAttempts = f'{(int(attempts)) + 1}'
@@ -225,7 +225,7 @@ class db:
         else:
             if (int(encryption.decrypt(loggedin_user[4]))) < 3:
                 self.cur.execute("UPDATE users SET attempts=:attempts WHERE username=:username", \
-                                 {"attempts": encryption.encrypt('0'), "username": username})
+                                 {"attempts": encryption.encrypt('0'), "username": encryption.encrypt(username.value)})
                 self.user = user(loggedin_user)
                 self.loggedin = 1
                 self.loggedin_user = encryption.decrypt(username.value)
@@ -258,41 +258,41 @@ class db:
                           '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
                           'User Menu'
 
-                    db_interface = user_interface(heading, db_menu_advisor)
-                    db_interface.run()
-                    del db_interface
-                elif self.admin_is_loggedin == '1':
-                    user_type = 'System Administrator'
-                    print('\n\n\n\nWelcome')
-                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▍ User type: ' + colored(user_type, 'red') + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
-                              'User Menu'
+                db_interface = user_interface(heading, db_menu_advisor)
+                db_interface.run()
+                del db_interface
+            elif self.admin_is_loggedin == '1':
+                user_type = 'System Administrator'
+                print('\n\n\n\nWelcome')
+                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                          'User Menu'
 
-                    db_interface = user_interface(heading, db_menu_system_admin)
-                    db_interface.run()
-                    del db_interface
-                elif self.admin_is_loggedin == '2':
-                    user_type = 'Super Administrator'
-                    print('\n\n\n\nWelcome')
-                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▍ User type: ' + colored(user_type, 'red') + '\n' + \
-                              '▍ ' + '\n' + \
-                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
-                              'User Menu'
+                db_interface = user_interface(heading, db_menu_system_admin)
+                db_interface.run()
+                del db_interface
+            elif self.admin_is_loggedin == '2':
+                user_type = 'Super Administrator'
+                print('\n\n\n\nWelcome')
+                heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                          '▍ ' + '\n' + \
+                          '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
+                          'User Menu'
 
-                    db_interface = user_interface(heading, db_menu_super_admin)
-                    db_interface.run()
-                    del db_interface
+                db_interface = user_interface(heading, db_menu_super_admin)
+                db_interface.run()
+                del db_interface
             else:
-                print('account blocked, take contact with the system administrator to reset your account')
+                print('account blocked, take contact with the system administrator to reset your password')
 
     def show_all_clients(self):
         sql_statement = 'SELECT * from client'
