@@ -1,3 +1,4 @@
+import re
 import sqlite3
 from sqlite3.dbapi2 import Connection
 
@@ -74,6 +75,16 @@ class uginput:
                 'username is not valid', '1')
         return False
 
+    def _checkemail(self):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+        if re.match(regex, self.value):
+            return True
+        return False
+
+
+
+
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
@@ -127,12 +138,35 @@ class uginput:
         domain_func = {
             'username': self._isValidUsername,
             'password': self._isValidPassword,
-            # 'email': self._isValidEmail
+            'email': self._isValidEmail
         }
 
         methodCall = (domain_func[self.domain_type]())
         return methodCall
 
+    def _isValidEmail(self):
+        if self.value is None:
+            logging(db, 'None', 'checking_emailadress', 'email has null value', '1')
+            return False
+
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '(', ')',
+                             '{', '}', ';', "'", ',', '.', '?', '/']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+        white_list.extend(symbols_premitted)
+
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checkemail(),
+                self._checkwhitelist(white_list)]
+
+            return all(valid)
+        else:
+            logging(db, self.value, 'checking_username', 'username is not valid', '1')
+            return False
 
 # User
 # --------------------------------------------------------------------
