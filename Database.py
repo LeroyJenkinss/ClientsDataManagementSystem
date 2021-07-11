@@ -40,36 +40,48 @@ class uginput:
         white_list.extend(digits)
         white_list.extend(symbols_premitted)
 
+        print(self.value[0])
         if self.value:
             valid = [
-                self[0] in lowercase_letters,
                 self._length(self.min_len, self.max_len),
+                self._checkFirstChar(self.value[0],lowercase_letters,uppercase_letters),
                 self._checkwhitelist(white_list)]
             return all(valid)
         else:
             logging.logging(self.value, 'checking_username', 'username is not valid', '1')
             return False
 
-    def check(self):
-        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+    def _check(self):
+        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
                              '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
-        digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
-
-        return any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (
-            any(x for x in digits)) and (any(x for x in symbols_premitted))
+        if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in digits)) and (any(x for x in symPremitted)):
+            return True
+        return False
+        print('hellloooooo')
 
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
                 return False
+        return True
 
     def input(self, question):
         self.value = input(question)
 
 
     def _length(self, min=0, max=64):
-        self.min = min
-        self.max = max
+        name = self.value
+        if min <= len(name) <= max:
+            return True
+        return False
+
+    def _checkFirstChar(self,char2Check,lowerLetters,upperLetters):
+        if char2Check  in lowerLetters:
+            return True
+        elif char2Check in upperLetters:
+            return  True
+        else:
+            return False
 
     def _isValidPassword(self):
         if self.value is None:
@@ -82,13 +94,13 @@ class uginput:
         white_list.extend(uppercase_letters)
         white_list.extend(digits)
         white_list.extend(symbols_premitted)
-        white_list.extend(self.min_len)
-        white_list.extend(self.max_len)
 
-        if self.check and self.value:
+        if self.value:
             valid = [
                 self._length(self.min_len, self.max_len),
+                self._check(),
                 self._checkwhitelist(white_list)]
+
 
             return all(valid)
         else:
@@ -178,7 +190,6 @@ class db:
 
         username = uginput('username', 5, 12)
         username.input('please enter username:')
-        print("hallo")
         if not username.isValid():
             print('username or password is incorrect')
             return
