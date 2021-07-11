@@ -25,18 +25,20 @@ digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 class logging():
 
     def __init__(self, db, username, description_of_activity, additionalinfo, suspicious):
-        print(date.today().strftime("%d-%b-%Y"))
-        self.username = encryption.encrypt(username)
-        self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
-        self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
-        self.description_of_activity = encryption.encrypt(description_of_activity)
-        self.additionalinfo = encryption.encrypt(additionalinfo)
-        self.supicious = encryption.encrypt(suspicious)
+        # self.username = encryption.encrypt(username)
+        # self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
+        # self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
+        # self.description_of_activity = encryption.encrypt(description_of_activity)
+        # self.additionalinfo = encryption.encrypt(additionalinfo)
+        # self.supicious = encryption.encrypt(suspicious)
+        self.username = username
+        self.date = date.today().strftime("%d-%b-%Y")
+        self.time = strftime("%H:%M:%S", localtime())
+        self.description_of_activity = description_of_activity
+        self.additionalinfo = additionalinfo
+        self.supicious = suspicious
 
         db.insertLoggingInDB(db,self.username, self.date, self.time, self.description_of_activity, self.additionalinfo, self.supicious)
-
-
-
 
 
 # uginput class
@@ -215,6 +217,7 @@ class db:
         username = uginput('username', 5, 12)
         username.input('please enter username:')
         if not username.isValid():
+            logging(db, username.value, 'tried to log in but couldnt','values used are' + username.value , 1)
             print('username or password is incorrect')
             return
 
@@ -224,6 +227,7 @@ class db:
             print('username or password is incorrect')
             return
 
+        logging(db, username.value, 'user logged in ', 'values used are' + username.value, 1)
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
@@ -329,6 +333,7 @@ class db:
                                 'mobile phone number']))
 
     def search_client(self):
+
         fullName = encryption.encrypt(input("please enter fullname: "))
         HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
         zipcode = encryption.encrypt(input("please enter ZipCode: "))
