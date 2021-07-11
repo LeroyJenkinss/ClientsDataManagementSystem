@@ -202,7 +202,7 @@ class db:
 
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
-        sql_statement = f'SELECT * from users WHERE username="{username}" AND password="{password}"'
+        sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
 
         self.cur.execute(sql_statement)
 
@@ -212,7 +212,7 @@ class db:
 
         else:
             self.loggedin = 1
-            self.loggedin_user = encryption.decrypt(username)
+            self.loggedin_user = encryption.decrypt(username.value)
             self.admin_is_loggedin = encryption.decrypt(loggedin_user[3])
             user_type = 'Admin' if self.admin_is_loggedin == 1 else 'Not Admin'
             if self.admin_is_loggedin == '0':
