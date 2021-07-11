@@ -56,12 +56,13 @@ class uginput:
                              '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
         if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in digits)) and (any(x for x in symPremitted)):
             return True
+        logging.logging(self.value, 'check_if_1capital_1lowerCase_1digit_1specialChar_is_present', 'username is not valid', '1')
         return False
-        print('hellloooooo')
 
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
+                logging.logging(self.value, 'checking_all_chars_in_whitelist', a +' is not in the whitelist', '1')
                 return False
         return True
 
@@ -73,6 +74,7 @@ class uginput:
         name = self.value
         if min <= len(name) <= max:
             return True
+        logging.logging(self.value, 'checking_min&max_length', 'username is too short or too long', '1')
         return False
 
     def _checkFirstChar(self,char2Check,lowerLetters,upperLetters):
@@ -81,6 +83,7 @@ class uginput:
         elif char2Check in upperLetters:
             return  True
         else:
+            logging.logging(self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
             return False
 
     def _isValidPassword(self):
@@ -203,6 +206,9 @@ class db:
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{username}" AND password="{password}"'
+        logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+
+       
 
         self.cur.execute(sql_statement)
 
