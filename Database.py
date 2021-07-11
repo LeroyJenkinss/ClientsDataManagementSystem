@@ -25,21 +25,13 @@ digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 class logging():
 
     def __init__(self, db, username, description_of_activity, additionalinfo, suspicious):
-        # self.username = encryption.encrypt(username)
-        # self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
-        # self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
-        # self.description_of_activity = encryption.encrypt(description_of_activity)
-        # self.additionalinfo = encryption.encrypt(additionalinfo)
-        # self.supicious = encryption.encrypt(suspicious)
-        self.username = username
-        self.date = date.today().strftime("%d-%b-%Y")
-        self.time = strftime("%H:%M:%S", localtime())
-        self.description_of_activity = description_of_activity
-        self.additionalinfo = additionalinfo
-        self.supicious = suspicious
-
-        db.insertLoggingInDB(db,self.username, self.date, self.time, self.description_of_activity, self.additionalinfo, self.supicious)
-
+        self.username = encryption.encrypt(username)
+        self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
+        self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
+        self.description_of_activity = encryption.encrypt(description_of_activity)
+        self.additionalinfo = encryption.encrypt(additionalinfo)
+        self.suspicious = encryption.encrypt(suspicious)
+        client.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')")
 
 # uginput class
 class uginput:
@@ -579,8 +571,10 @@ class db:
                        headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
 
     def insertLoggingInDB(db,username, date, time, description_of_activity, additionalinfo, suspicious):
-        sql_statement = F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious})"
-        db.cur.execute(sql_statement)
+        print(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')")
+        # sql_statement = F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')"
+        # print(sql_statement)
+        db.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}','{date}','{time}','{description_of_activity}','{additionalinfo}','{suspicious}')")
         db.conn.commit()
 
     def logout(self):
