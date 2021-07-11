@@ -3,9 +3,9 @@ from ui import *
 from termcolor import colored
 import EncryptingDb
 from zipfile import ZipFile
-from datetime import datetime
 from tabulate import tabulate
-import logging
+from datetime import datetime, date
+from time import localtime, strftime
 
 # GLobal Variables
 # --------------------------------------------------------------------
@@ -20,6 +20,23 @@ uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 
 
+class logging():
+
+    def __init__(self, db, username, description_of_activity, additionalinfo, suspicious):
+        print(date.today().strftime("%d-%b-%Y"))
+        self.username = encryption.encrypt(username)
+        self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
+        self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
+        self.description_of_activity = encryption.encrypt(description_of_activity)
+        self.additionalinfo = encryption.encrypt(additionalinfo)
+        self.supicious = encryption.encrypt(suspicious)
+
+        db.insertLoggingInDB(db,self.username, self.date, self.time, self.description_of_activity, self.additionalinfo, self.supicious)
+
+
+
+
+
 # uginput class
 class uginput:
     def __init__(self, domain_type: str, min_len=None, max_len=None, range=None):
@@ -31,8 +48,9 @@ class uginput:
 
     def _isValidUsername(self):
         if self.value is None:
-            logging.logging('None', 'checking_username', 'username has null value', '1')
+            logging(db,self.value, 'checking_username', 'username has null value', '1')
             return False
+        logging(db,self.value, 'checking_username', 'username has null value', '1')
         symbols_premitted = ['!', '.', '_']
         white_list = []
         white_list.extend(lowercase_letters)
@@ -40,55 +58,55 @@ class uginput:
         white_list.extend(digits)
         white_list.extend(symbols_premitted)
 
-        print(self.value[0])
         if self.value:
             valid = [
                 self._length(self.min_len, self.max_len),
-                self._checkFirstChar(self.value[0],lowercase_letters,uppercase_letters),
+                self._checkFirstChar(self.value[0], lowercase_letters, uppercase_letters),
                 self._checkwhitelist(white_list)]
             return all(valid)
         else:
-            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            logging(db,self.value, 'checking_username', 'username is not valid', '1')
             return False
 
     def _check(self):
         symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
-                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
-        if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (any(x for x in digits)) and (any(x for x in symPremitted)):
+                        '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (
+                any(x for x in digits)) and (any(x for x in symPremitted)):
             return True
-        logging.logging(self.value, 'check_if_1capital_1lowerCase_1digit_1specialChar_is_present', 'username is not valid', '1')
+        logging(db,self.value, 'check_if_1capital_1lowerCase_1digit_1specialChar_is_present',
+                'username is not valid', '1')
         return False
 
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
-                logging.logging(self.value, 'checking_all_chars_in_whitelist', a +' is not in the whitelist', '1')
+                logging(db,self.value, 'checking_all_chars_in_whitelist', a + ' is not in the whitelist', '1')
                 return False
         return True
 
     def input(self, question):
         self.value = input(question)
 
-
     def _length(self, min=0, max=64):
         name = self.value
         if min <= len(name) <= max:
             return True
-        logging.logging(self.value, 'checking_min&max_length', 'username is too short or too long', '1')
+        logging(db,self.value, 'checking_min&max_length', 'username is too short or too long', '1')
         return False
 
-    def _checkFirstChar(self,char2Check,lowerLetters,upperLetters):
-        if char2Check  in lowerLetters:
+    def _checkFirstChar(self, char2Check, lowerLetters, upperLetters):
+        if char2Check in lowerLetters:
             return True
         elif char2Check in upperLetters:
-            return  True
+            return True
         else:
-            logging.logging(self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
+            logging(db,self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
             return False
 
     def _isValidPassword(self):
         if self.value is None:
-            logging.logging('None', 'checking_password', 'password has null value', '1')
+            logging(db,'None', 'checking_password', 'password has null value', '1')
             return False
         symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
                              '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
@@ -104,10 +122,9 @@ class uginput:
                 self._check(),
                 self._checkwhitelist(white_list)]
 
-
             return all(valid)
         else:
-            logging.logging(self.value, 'checking_username', 'username is not valid', '1')
+            logging(db,self.value, 'checking_username', 'username is not valid', '1')
             return False
 
     def isValid(self):
@@ -168,19 +185,23 @@ class db:
         try:
             self.cur.execute(tb_create)
             # add sample records to the db manually
-            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')})")
-            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')}, {encryption.encrypt('0')})")
-            self.cur.execute(F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')}, {encryption.encrypt('0')})")
+            self.cur.execute(
+                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')})")
+            self.cur.execute(
+                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')}, {encryption.encrypt('0')})")
+            self.cur.execute(
+                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')}, {encryption.encrypt('0')})")
             self.conn.commit()
         except:
             None
 
         # create logging table if it doesnt excist
         # sqlite3 doesnt have datetime or boolean(0 = false, 1 = true), date and time are strings and boolean is iteger
-        tb_create = "CREATE TABLE logging (username TEXT, date TEXT, time TEXT, description_of_activity TEXT, additionalInfo TEXT, supicious varchar)"
+        tb_create = "CREATE TABLE logging (username TEXT, date TEXT, time TEXT, description_of_activity TEXT, additionalInfo TEXT, supicious TEXT)"
         try:
             self.cur.execute(tb_create)
-            self.cur.execute( F"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('{encryption.encrypt('Billy')}', '{encryption.encrypt('30-10-1979')}', '{encryption.encrypt('19:28:00')}', '{encryption.encrypt('log on')}', '{encryption.encrypt('Hassan loggedin')}', {encryption.encrypt('0')})")
+            self.cur.execute(
+                F"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('{encryption.encrypt('Billy')}', '{encryption.encrypt('30-10-1979')}', '{encryption.encrypt('19:28:00')}', '{encryption.encrypt('log on')}', '{encryption.encrypt('Hassan loggedin')}', {encryption.encrypt('0')})")
             self.conn.commit()
         except:
             None
@@ -203,13 +224,12 @@ class db:
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
 
-
-
         self.cur.execute(sql_statement)
 
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
-            logging.logging(username.value, 'attempt_login_failed password = ' + password.value, 'username is not valid', '1')
+            logging(username.value, 'attempt_login_failed password = ' + password.value,
+                    'username is not valid', '1')
             print("Login failed")
             self.cur.execute(
                 "SELECT attempts FROM users WHERE username=:username", \
@@ -219,7 +239,8 @@ class db:
             incrAttempts = f'{(int(attempts)) + 1}'
 
             self.cur.execute("UPDATE users SET attempts=:attempts WHERE username=:username", \
-                        {"attempts": encryption.encrypt(incrAttempts),    "username": encryption.encrypt(username.value)})
+                             {"attempts": encryption.encrypt(incrAttempts),
+                              "username": encryption.encrypt(username.value)})
             self.conn.commit()
 
         else:
@@ -229,18 +250,18 @@ class db:
                 self.user = user(loggedin_user)
                 self.loggedin = 1
                 self.loggedin_user = encryption.decrypt(username.value)
-                self.admin_is_loggedin =  encryption.decrypt(loggedin_user[3])
+                self.admin_is_loggedin = encryption.decrypt(loggedin_user[3])
                 user_type = 'Admin' if self.admin_is_loggedin == 1 else 'Not Admin'
                 if self.admin_is_loggedin == '0':
                     user_type = 'Advisor'
                     print('\n\n\n\nWelcome')
-                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄'  + '\n'   + \
-                              '▍ '                                           + '\n'   + \
-                              '▍ Username: ' + colored(self.loggedin_user, 'red')   + '\n'   + \
-                              '▍ '                                           + '\n'   + \
-                              '▍ User type: ' + colored(user_type, 'red')    + '\n'   + \
-                              '▍ '                                           + '\n'   + \
-                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀'  + '\n'   + \
+                    heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▍ User type: ' + colored(user_type, 'red') + '\n' + \
+                              '▍ ' + '\n' + \
+                              '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
                               'User Menu'
             self.loggedin = 1
             self.loggedin_user = encryption.decrypt(username.value)
@@ -299,17 +320,22 @@ class db:
         self.cur.execute(sql_statement)
         clients = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(clients)
-        print(tabulate(decryptedList, headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address', 'mobile phone number']))
+        print(tabulate(decryptedList,
+                       headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
+                                'mobile phone number']))
 
     def search_client(self):
         fullName = encryption.encrypt(input("please enter fullname: "))
         HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
         zipcode = encryption.encrypt(input("please enter ZipCode: "))
-        self.cur.execute("SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                         {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
-        client =  self.cur.fetchone()
+        self.cur.execute(
+            "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+            {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+        client = self.cur.fetchone()
         decryptedList = encryption.decryptTupleToList(client)
-        print(tabulate([decryptedList], headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address', 'mobile phone number']))
+        print(tabulate([decryptedList],
+                       headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
+                                'mobile phone number']))
 
     def select_role(self, users):
         for u in users:
@@ -320,7 +346,6 @@ class db:
             elif u[2] == '2':
                 u[2] = 'super admin'
         return users
-
 
     def show_all_users(self):
         sql_statement = 'SELECT username, fullname ,admin from users'
@@ -339,7 +364,7 @@ class db:
         City = input("please enter City: ")
         EmailAddress = input("please enter EmailAddress: ")
         MobilePhone = input("please enter MobilePhone +31-6-: ")
-        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-'+ MobilePhone)}')"
+        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-' + MobilePhone)}')"
         try:
             self.cur.execute(client1)
             self.conn.commit()
@@ -352,12 +377,13 @@ class db:
         HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
         zipcode = encryption.encrypt(input("please enter ZipCode: "))
         try:
-            self.cur.execute("DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                             {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+            self.cur.execute(
+                "DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+                {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
             self.conn.commit()
             print('client has been deleted')
         except:
-            print('client deletion has failed' )
+            print('client deletion has failed')
 
     def modify_client(self):
         fullName = input("please enter fullname: ")
@@ -374,7 +400,12 @@ class db:
         try:
             self.cur.execute(
                 "UPDATE client SET fullname=:newFullname, StreetAddress=:newStreetAddress, HouseNumber=:HouseNumberNew, ZipCode=:ZipCodeNew, City=:CityNew, EmailAddress=:EmailAddressNew, MobilePhone=:MobilePhoneNew WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                {"newFullname": encryption.encrypt(fullnameNew), "newStreetAddress":encryption.encrypt(StreetAddressNew), "HouseNumberNew":encryption.encrypt(HouseNumberNew), "ZipCodeNew":encryption.encrypt(ZipCodeNew),"CityNew":encryption.encrypt(CityNew),"EmailAddressNew": encryption.encrypt(EmailAddressNew),"MobilePhoneNew":encryption.encrypt(MobilePhoneNew), "fullname": encryption.encrypt(fullName), "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
+                {"newFullname": encryption.encrypt(fullnameNew),
+                 "newStreetAddress": encryption.encrypt(StreetAddressNew),
+                 "HouseNumberNew": encryption.encrypt(HouseNumberNew), "ZipCodeNew": encryption.encrypt(ZipCodeNew),
+                 "CityNew": encryption.encrypt(CityNew), "EmailAddressNew": encryption.encrypt(EmailAddressNew),
+                 "MobilePhoneNew": encryption.encrypt(MobilePhoneNew), "fullname": encryption.encrypt(fullName),
+                 "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
             self.conn.commit()
             print('client has been modified')
         except:
@@ -393,14 +424,15 @@ class db:
 
     def change_password(self):
         oldPassword = input("please enter old password: ")
-        if(oldPassword == self.user.password):
+        if (oldPassword == self.user.password):
             newPassword = input("please enter new password: ")
             newPasswordRepeated = input("please reenter new password: ")
             if newPassword == newPasswordRepeated:
                 try:
                     self.cur.execute(
                         "UPDATE users SET password=:password, attempts=:attempts WHERE username=:username", \
-                        {"password": encryption.encrypt(newPassword), "attempts":encryption.encrypt('0'), "username": self.user.username})
+                        {"password": encryption.encrypt(newPassword), "attempts": encryption.encrypt('0'),
+                         "username": self.user.username})
                     self.conn.commit()
                     print('advisor has been modified')
                 except:
@@ -412,7 +444,7 @@ class db:
 
     def backup(self):
         # create a ZipFile object
-        zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M') }.zip", 'w')
+        zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M')}.zip", 'w')
         # Add multiple files to the zip
         zipObj.write('mycompany.db')
         # close the Zip File
@@ -430,6 +462,7 @@ class db:
             print('advisor has been added')
         except:
             print('advisor failed to be added')
+
     def modify_advisor(self):
         oldUsername = input("please enter username: ")
         username = input("please enter new username: ")
@@ -439,7 +472,8 @@ class db:
         try:
             self.cur.execute(
                 "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
-                {"username": encryption.encrypt(username), "password": encryption.encrypt(password), "fullname": encryption.encrypt(fullname),
+                {"username": encryption.encrypt(username), "password": encryption.encrypt(password),
+                 "fullname": encryption.encrypt(fullname),
                  "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
             self.conn.commit()
             print('advisor has been modified')
@@ -456,12 +490,12 @@ class db:
         try:
             self.cur.execute(
                 "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password), "role":encryption.encrypt(role)})
+                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password),
+                 "role": encryption.encrypt(role)})
             self.conn.commit()
             print('advisor has been modified')
         except:
             print('advisor password reset has failed')
-
 
     def add_new_admin(self):
         username = input("please enter username: ")
@@ -485,7 +519,8 @@ class db:
         try:
             self.cur.execute(
                 "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
-                {"username": encryption.encrypt(username), "password": encryption.encrypt(password), "fullname": encryption.encrypt(fullname),
+                {"username": encryption.encrypt(username), "password": encryption.encrypt(password),
+                 "fullname": encryption.encrypt(fullname),
                  "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
             self.conn.commit()
             print('admin has been modified')
@@ -514,7 +549,13 @@ class db:
         self.cur.execute(sql_statement)
         log = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(log)
-        print(tabulate(decryptedList, headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
+        print(tabulate(decryptedList,
+                       headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
+
+    def insertLoggingInDB(db,username, date, time, description_of_activity, additionalinfo, suspicious):
+        sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious})"
+        db.cur.execute(sql_statement)
+        db.conn.commit()
 
     def logout(self):
         self.loggedin = 0
@@ -530,35 +571,34 @@ class db:
     def see_loggingFile(self):
         return
 
-    def insertLoggingInDB(self, username, date, time, description_of_activity, additionalInfo, supicious):
-        sql_statement = f"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES (date, time, description_of_activity, additionalInfo, supicious)"
-        self.cur.execute(sql_statement)
 
 def escape_sql_meta(sql_query):
     pass
 
-client = db(company_db_name, client_tb_name, users_tb_name)
-main_menu = [[1, 'login', client.login ], [0, 'Exit', client.close]]
-db_menu_advisor = [ [1, 'change password', client.change_password], [2, 'add new client', client.add_new_client], \
-            [3, 'search for client', client.search_client], \
-            [4, 'modify a client', client.modify_client], [0, 'logout', client.logout]]
 
-db_menu_system_admin = [ [1, 'change password', client.change_password], [2, 'show all users', client.show_all_users], \
-            [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
-            [5, 'delete a client', client.delete_client],\
-            [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
-            [8, 'reset advisor password', client.reset_advisor_password], [9, 'read logs', client.read_logs], \
-            [10, 'modify a client', client.modify_client],\
-            [11, 'search for client', client.search_client], \
-            [12, 'make backup', client.backup], [0, 'logout', client.logout]]
+client = db(company_db_name, client_tb_name, users_tb_name)
+main_menu = [[1, 'login', client.login], [0, 'Exit', client.close]]
+db_menu_advisor = [[1, 'change password', client.change_password], [2, 'add new client', client.add_new_client], \
+                   [3, 'search for client', client.search_client], \
+                   [4, 'modify a client', client.modify_client], [0, 'logout', client.logout]]
+
+db_menu_system_admin = [[1, 'change password', client.change_password], [2, 'show all users', client.show_all_users], \
+                        [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
+                        [5, 'delete a client', client.delete_client], \
+                        [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
+                        [8, 'reset advisor password', client.reset_advisor_password],
+                        [9, 'read logs', client.read_logs], \
+                        [10, 'modify a client', client.modify_client], \
+                        [11, 'search for client', client.search_client], \
+                        [12, 'make backup', client.backup], [0, 'logout', client.logout]]
 
 db_menu_super_admin = [[1, 'show all clients', client.show_all_clients], [2, 'show all users', client.show_all_users], \
-            [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
-            [5, 'delete a client', client.delete_client], \
-            [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
-            [8, 'reset advisor password', client.reset_advisor_password], [9, 'read logs', client.read_logs], \
-            [10, 'modify a client', client.modify_client],
-            [11, 'search for client', client.search_client], [12, 'add new admin', client.add_new_admin], \
-            [13, 'modify admin', client.modify_admin], [14, 'delete a admin', client.delete_admin], \
-            [15, 'reset admin password', client.reset_admin_password],
-            [16, 'make backup', client.backup], [0, 'logout', client.logout]]
+                       [3, 'add new client', client.add_new_client], [4, 'add new advisor', client.add_new_advisor], \
+                       [5, 'delete a client', client.delete_client], \
+                       [6, 'modify advisor', client.modify_advisor], [7, 'delete a advisor', client.delete_advisor], \
+                       [8, 'reset advisor password', client.reset_advisor_password], [9, 'read logs', client.read_logs], \
+                       [10, 'modify a client', client.modify_client],
+                       [11, 'search for client', client.search_client], [12, 'add new admin', client.add_new_admin], \
+                       [13, 'modify admin', client.modify_admin], [14, 'delete a admin', client.delete_admin], \
+                       [15, 'reset admin password', client.reset_admin_password],
+                       [16, 'make backup', client.backup], [0, 'logout', client.logout]]

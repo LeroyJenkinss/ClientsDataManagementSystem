@@ -14,7 +14,8 @@ class logging:
         self.additionalInfo = self.encrypt(additionalInfo)
         self.supicious = self.encrypt(supicious)
 
-        Database.db().insertLoggingInDB(self.username,self.date,self.time,self.description_of_activity,self.additionalInfo,self.supicious)
+        Database.db.insertLoggingInDB(self.username,self.date,self.time,self.description_of_activity,self.additionalInfo,self.supicious)
+
 
 
 
