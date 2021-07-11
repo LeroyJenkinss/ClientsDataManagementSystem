@@ -201,10 +201,10 @@ class db:
 
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
-        sql_statement = f'SELECT * from users WHERE username="{username}" AND password="{password}"'
+        sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
         logging.logging(self.value, 'checking_username', 'username is not valid', '1')
 
-       
+
 
         self.cur.execute(sql_statement)
 
