@@ -22,6 +22,10 @@ lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
 uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
 
+cities = [
+    [1, 'Ankara'], [2, 'Marakesh'], [3, 'Samsun'], [4, 'Sivas'], [5, 'Tehran'], [6, 'Nijkerk'], [7, 'Nador'], [8, 'Istanbul'], [9, 'Gaza'], [10, 'Mashhad']
+]
+
 
 class logging():
 
@@ -31,8 +35,16 @@ class logging():
         self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
         self.description_of_activity = encryption.encrypt(description_of_activity)
         self.additionalinfo = encryption.encrypt(additionalinfo)
-        self.suspicious = encryption.encrypt(suspicious)
+        self.suspicious = encryption.encrypt(f'{suspicious}')
+        # self.username = username
+        # self.date = date.today().strftime("%d-%b-%Y")
+        # self.time = strftime("%H:%M:%S", localtime())
+        # self.description_of_activity = description_of_activity
+        # self.additionalinfo = additionalinfo
+        # self.suspicious = f'{suspicious}'
         client.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')")
+        # F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')"
+        client.conn.commit()
 
 # uginput class
 class uginput:
@@ -82,8 +94,20 @@ class uginput:
             return True
         return False
 
+    def _checkZip(self):
+        regex = r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$"
+
+        if re.match(regex, self.value):
+            return True
+        return False
+
+    def _checktelephonenumber(self):
+        regex = r"^[0-9]{8}"
 
 
+        if re.match(regex, self.value):
+            return True
+        return False
 
     def _checkwhitelist(self, white_list):
         for a in self.value:
@@ -109,6 +133,44 @@ class uginput:
             return True
         else:
             logging(db,self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
+            return False
+
+    def _isValidZipcode(self):
+        if self.value is None:
+            logging(db,'None', 'checking_zipcode', 'zipcode has null value', '1')
+            return False
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checkZip(),
+                self._checkwhitelist(white_list)]
+
+            return all(valid)
+        else:
+            logging(db,self.value, 'checking_username', 'username is not valid', '1')
+            return False
+
+    def _isValidTelephonenumber(self):
+        if self.value is None:
+            logging(db, 'None', 'checking_telephonenumber', 'telephonenumber has null value', '1')
+            return False
+        white_list = []
+        white_list.extend(digits)
+
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checktelephonenumber(),
+                self._checkwhitelist(white_list)]
+
+            return all(valid)
+        else:
+            logging(db, self.value, 'checking_username', 'username is not valid', '1')
             return False
 
     def _isValidPassword(self):
@@ -138,7 +200,9 @@ class uginput:
         domain_func = {
             'username': self._isValidUsername,
             'password': self._isValidPassword,
-            'email': self._isValidEmail
+            'email': self._isValidEmail,
+            "zipcode": self._isValidZipcode,
+            "telephonenumber": self._isValidTelephonenumber
         }
 
         methodCall = (domain_func[self.domain_type]())
@@ -264,7 +328,7 @@ class db:
         if not loggedin_user:  # An empty result evaluates to False.
             logging(username.value, 'attempt_login_failed password = ' + password.value,
                     'username is not valid', '1')
-            print("Login failed")
+            print('username or password is incorrect')
             self.cur.execute(
                 "SELECT attempts FROM users WHERE username=:username", \
                 {"username": encryption.encrypt(username.value)})
@@ -391,12 +455,51 @@ class db:
         print(tabulate(decryptedList,
                        headers=['username', 'fullname', 'admin']))
 
+    def menu_display(self):
+        print('_________________________________\n')
+        print('Select a city')
+        print('_________________________________\n')
+        for option in cities:
+            print('[' + str(option[0]) + ']' + ' ' + option[1])
+
+    def select_city(self):
+        self.menuoptions = [option[0] for option in cities]
+        self.menu_display()
+        try:
+            option = int(input('Choose a number from the menu: '))
+            print()
+        except:
+            option = -1
+            print()
+
+        while option != self.menuoptions[-1]:
+            if option in self.menuoptions:
+                try:
+                    func_return = cities[self.menuoptions.index(option)][1]
+                    if func_return == 0:
+                        continue
+                    else:
+                        return func_return
+                except:
+                    print('Error!')
+            else:
+                print('invalid option')
+
+            print()
+            self.menu_display()
+            try:
+                option = int(input('Choose a number from the menu: '))
+                print()
+            except:
+                option = -1
+                print()
+
     def add_new_client(self):
         fullname = input("please enter fullname: ")
         StreetAddress = input("please enter StreetAddress: ")
         HouseNumber = input("please enter HouseNumber: ")
         ZipCode = input("please enter ZipCode: ")
-        City = input("please enter City: ")
+        City = self.select_city()
         EmailAddress = input("please enter EmailAddress: ")
         MobilePhone = input("please enter MobilePhone +31-6-: ")
         client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-' + MobilePhone)}')"
@@ -435,7 +538,7 @@ class db:
         ZipCodeNew = input("please enter new ZipCode: ")
         CityNew = input("please enter new City: ")
         EmailAddressNew = input("please enter new EmailAddress: ")
-        MobilePhoneNew = input("please enter new MobilePhone +31-6-: ")
+        MobilePhoneNew = int(input("please enter new MobilePhone +31-6-: "))
         try:
             self.cur.execute(
                 "UPDATE client SET fullname=:newFullname, StreetAddress=:newStreetAddress, HouseNumber=:HouseNumberNew, ZipCode=:ZipCodeNew, City=:CityNew, EmailAddress=:EmailAddressNew, MobilePhone=:MobilePhoneNew WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
@@ -443,7 +546,7 @@ class db:
                  "newStreetAddress": encryption.encrypt(StreetAddressNew),
                  "HouseNumberNew": encryption.encrypt(HouseNumberNew), "ZipCodeNew": encryption.encrypt(ZipCodeNew),
                  "CityNew": encryption.encrypt(CityNew), "EmailAddressNew": encryption.encrypt(EmailAddressNew),
-                 "MobilePhoneNew": encryption.encrypt(MobilePhoneNew), "fullname": encryption.encrypt(fullName),
+                 "MobilePhoneNew": encryption.encrypt(f'{MobilePhoneNew}'), "fullname": encryption.encrypt(fullName),
                  "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
             self.conn.commit()
             print('client has been modified')
@@ -583,13 +686,24 @@ class db:
         self.delete_user('1')
 
     def reset_admin_password(self):
-        advisorName = input("please enter Advisor username: ")
-        password = input("please enter new Advisor password: ")
+        username = uginput('username', 5, 12)
+        username.input('please enter username:')
+        if not username.isValid():
+            logging(db, self.user.username, 'Username input failed value', 'values used are' + username.value, 1)
+            print('username or password is incorrect')
+            return
+
+        password = uginput('password', 8, 30)
+        password.input('please enter password:')
+        if not password.isValid():
+            print('username or password is incorrect')
+            logging(db, username.value, 'tried to log in but couldnt', 'values used are' + username.value, 1)
+            return
         role = '1'
         try:
             self.cur.execute(
                 "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password),
+                {"username": encryption.encrypt(username.value), "password": encryption.encrypt(password.value),
                  "role": encryption.encrypt(role)})
             self.conn.commit()
             print('admin password has been modified')
