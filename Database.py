@@ -198,6 +198,8 @@ class uginput:
 
     def isValid(self):
         domain_func = {
+            'oldusername': self._isValidUsername(),
+            'fullname': self._isValidUsername,
             'username': self._isValidUsername,
             'password': self._isValidPassword,
             'email': self._isValidEmail,
@@ -602,50 +604,97 @@ class db:
         zipObj.close()
 
     def add_new_advisor(self):
-        username = input("please enter username: ")
-        password = input("please enter password: ")
-        fullname = input("please enter fullname: ")
+
+        username = uginput('username', 5, 12)
+        username.input("please enter username: ")
+        if not username.isValid():
+            logging(db, username.value, 'tried to add a username for new advisor, values used are' + username.value, 1)
+            print('username,password or fullname is incorrect')
+            return
+
+        password = uginput('password', 8, 30)
+        password.input("please enter password: ")
+        if not password.isValid():
+            logging(db, username.value, 'tried to add a password for new advisor', 'values used are' + password.value, 1)
+            print('username,password or fullname is incorrect')
+            return
+
+        fullname = uginput('fullname', 5, 12)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, username.value, 'tried to add a fullname for a new advisor', 'values used are' + fullname.value, 1)
+            print('username,password or fullname is incorrect')
+            return
         admin = '0'
         try:
             self.cur.execute(
                 F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
             self.conn.commit()
-            logging(db, self.user.username, 'added new advisor','new values username '+username+' fullname '+fullname,0)
+            logging(db, self.user.username, 'added new advisor','new values username '+username.value+' fullname '+fullname.value,0)
             print('advisor has been added')
         except:
-            logging(db, self.user.username, 'failed adding new advisor','new values username ' + username + ' fullname ' + fullname, 1)
+            logging(db, self.user.username, 'failed adding new advisor','new values username ' + username.value + ' fullname ' + fullname.value, 1)
             print('advisor failed to be added')
 
     def modify_advisor(self):
-        oldUsername = input("please enter username: ")
-        username = input("please enter new username: ")
-        password = input("please enter new password: ")
-        fullname = input("please enter new fullname: ")
+        # validating oldusername
+        oldusername = uginput('oldusername', 5, 12)
+        oldusername.input("please enter fullname: ")
+        if not oldusername.isValid():
+            logging(db, oldusername.value, 'tried to modify an advisor olduusername incorrect', 'values used are' + oldusername.value,1)
+            print('old username was incorrect/or not found')
+            return
+
+        # validating username
+        username = uginput('username', 5, 12)
+        username.input("please enter new username: ")
+        if not username.isValid():
+            logging(db, username.value, 'tried to modify an advisor username incorrect', 'values used are' + username.value,1)
+            print('old username was incorrect/or not found')
+            return
+
+        #validating password
+        password = uginput('password', 8, 30)
+        password.input("please enter password: ")
+        if not password.isValid():
+            logging(db, username.value, 'tried to modify a password for advisor', 'values used are' + password.value,
+                    1)
+            print('username,password or fullname is incorrect')
+            return
+
+        #validating fullname
+        fullname = uginput('fullname', 5, 12)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, username.value, 'tried to modify a fullname for a new advisor', 'values used are' + fullname.value,
+                    1)
+            print('username,password or fullname is incorrect')
+            return
         role = '0'
         try:
             self.cur.execute(
                 "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
                 {"username": encryption.encrypt(username), "password": encryption.encrypt(password),
                  "fullname": encryption.encrypt(fullname),
-                 "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
+                 "oldUsername": encryption.encrypt(oldusername), "role": encryption.encrypt(role)})
             self.conn.commit()
-            logging(db, self.user.username, 'modified advisor','values modified are oldUsername' + oldUsername +' to '+username+ ' fullname ' + fullname, 0)
+            logging(db, self.user.username, 'modified advisor','values modified are oldUsername' + oldusername.value +' to '+username.value+ ' fullname ' + fullname.value, 0)
             print('advisor has been modified')
         except:
-            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldUsername + ' to ' + username + ' fullname ' + fullname, 0)
+            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value, 0)
             print('advisor modification has failed')
 
     def delete_advisor(self):
         self.delete_user('0')
 
     def reset_advisor_password(self):
-        advisorName = input("please enter Advisor username: ")
+        advisorname = input("please enter Advisor username: ")
         password = input("please enter new Advisor password: ")
         role = '0'
         try:
             self.cur.execute(
                 "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(advisorName), "password": encryption.encrypt(password),
+                {"username": encryption.encrypt(advisorname), "password": encryption.encrypt(password),
                  "role": encryption.encrypt(role)})
             self.conn.commit()
             print('advisor has been modified')
