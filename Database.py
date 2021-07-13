@@ -21,11 +21,12 @@ now = datetime.now()
 lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
 uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
-symbols_premitted = ['!', '@', '#', '$', '^','_','+', '`', '|',
-                             '{', '}', ':', '<', '>', '?', '/']
-blacklist = ['-','=','(', ')','[',"'",';', ',', '.','/' '\\', ']']
+symbols_premitted = ['!', '@', '#', '$', '^', '_', '+', '`', '|',
+                     '{', '}', ':', '<', '>', '?', '/']
+blacklist = ['-', '=', '(', ')', '[', "'", ';', ',', '.', '/' '\\', ']']
 cities = [
-    [1, 'Ankara'], [2, 'Marakesh'], [3, 'Samsun'], [4, 'Sivas'], [5, 'Tehran'], [6, 'Nijkerk'], [7, 'Nador'], [8, 'Istanbul'], [9, 'Gaza'], [10, 'Mashhad']
+    [1, 'Ankara'], [2, 'Marakesh'], [3, 'Samsun'], [4, 'Sivas'], [5, 'Tehran'], [6, 'Nijkerk'], [7, 'Nador'],
+    [8, 'Istanbul'], [9, 'Gaza'], [10, 'Mashhad']
 ]
 
 
@@ -45,15 +46,15 @@ class logging():
 
         self.username += username[a]
         self.username = encryption.encrypt(self.username)
-
-        print(self.username)
         self.date = encryption.encrypt(now.strftime('%d-%m-%Y'))
         self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
         self.description_of_activity = encryption.encrypt(description_of_activity)
         self.additionalinfo = encryption.encrypt(additionalinfo)
         self.suspicious = encryption.encrypt(f'{suspicious}')
-        print(client.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')"))
+        client.cur.execute(
+            F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')")
         client.conn.commit()
+
 
 # uginput class
 class uginput:
@@ -64,9 +65,28 @@ class uginput:
         self.range = range
         self.domain_type = domain_type
 
+    def _isHouseNumberValid(self):
+        if self.value is None:
+            logging(db, 'None', self.domain_type, 'username has null value', '1')
+            return False
+
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(digits)
+
+        if self.value:
+            valid = [
+                self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, 'empty', 'checking '+self.domain_type, self.domain_type+' username is not valid', '1')
+                return False
+
     def _isValidUsername(self):
         if self.value is None:
-            logging(db,self.value, 'checking_username', 'username has null value', '1')
+            logging(db, 'None', self.domain_type, 'username has null value', '1')
             return False
 
         symbols_premitted = ['!', '.', '_']
@@ -79,20 +99,21 @@ class uginput:
         if self.value:
             valid = [
                 self._length(self.min_len, self.max_len),
-                self._checkFirstChar(self.value[0], lowercase_letters, uppercase_letters),
+                self._checkFirstChar(str(self.value[0]), lowercase_letters, uppercase_letters),
                 self._checkwhitelist(white_list)]
-            return all(valid)
-        else:
-            logging(db,self.value, 'checking_username', 'username is not valid', '1')
-            return False
+            if all(valid):
+                return True
+            else:
+                logging(db, self.domain_type, 'checking_username', 'username is not valid', '1')
+                return False
 
     def _check(self):
-        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_',  '+',  '`', '|',
-                        '{', '}',  ':',  '<', '>','?', ]
+        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '+', '`', '|',
+                        '{', '}', ':', '<', '>', '?', ]
         if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (
                 any(x for x in digits)) and (any(x for x in symPremitted)):
             return True
-        logging(db,self.value, 'check_if_1capital_1lowerCase_1digit_1specialChar_is_present',
+        logging(db, self.value, 'check_if_1capital_1lowerCase_1digit_1specialChar_is_present',
                 'username is not valid', '1')
         return False
 
@@ -104,15 +125,18 @@ class uginput:
         return False
 
     def _checkZip(self):
-        regex = r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$"
-
-        if re.match(regex, self.value):
+        # regex = r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$"
+        # print(re.search(regex, self.value))
+        # print(re.matchh(regex, self.value))
+        x = re.search(r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$", self.value)
+        print(x)
+        if x:
             return True
-        return False
+        else:
+            return False
 
     def _checktelephonenumber(self):
         regex = r"^[0-9]{8}"
-
 
         if re.match(regex, self.value):
             return True
@@ -121,18 +145,21 @@ class uginput:
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
-                logging(db,self.value, 'checking_all_chars_in_whitelist', a + ' is not in the whitelist', '1')
+                logging(db, self.value, 'checking_all_chars_in_whitelist', a + ' is not in the whitelist', '1')
                 return False
         return True
 
+    def intinput(self, question):
+        self.value = int(input(question))
+
     def input(self, question):
         self.value = input(question)
-
+    
     def _length(self, min=0, max=64):
         name = self.value
         if min <= len(name) <= max:
             return True
-        logging(db,self.value, 'checking_min&max_length', 'username is too short or too long', '1')
+        logging(db, self.value, 'checking_min&max_length', 'username is too short or too long', '1')
         return False
 
     def _checkFirstChar(self, char2Check, lowerLetters, upperLetters):
@@ -141,12 +168,12 @@ class uginput:
         elif char2Check in upperLetters:
             return True
         else:
-            logging(db,self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
+            logging(db, self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
             return False
 
     def _isValidZipcode(self):
         if self.value is None:
-            logging(db,'None', 'checking_zipcode', 'zipcode has null value', '1')
+            logging(db, 'None', 'checking_zipcode', 'zipcode has null value', '1')
             return False
         white_list = []
         white_list.extend(lowercase_letters)
@@ -158,11 +185,13 @@ class uginput:
                 self._length(self.min_len, self.max_len),
                 self._checkZip(),
                 self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                return False
 
-            return all(valid)
-        else:
-            logging(db,self.value, 'checking_username', 'username is not valid', '1')
-            return False
+
 
     def _isValidTelephonenumber(self):
         if self.value is None:
@@ -176,17 +205,26 @@ class uginput:
                 self._length(self.min_len, self.max_len),
                 self._checktelephonenumber(),
                 self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                return False
 
-            return all(valid)
-        else:
-            logging(db, self.value, 'checking_username', 'username is not valid', '1')
+    def _inrange(self):
+        if self.value is None:
+            logging(db, 'None', self.domain_type, 'username has null value', '1')
             return False
+        for x in self.range:
+            if x == self.value:
+                return True
+        return False
 
     def _isValidPassword(self):
         if self.value is None:
-            logging(db,'None', 'checking_password', 'password has null value', '1')
+            logging(db, 'None', 'checking_password', 'password has null value', '1')
             return False
-        symbols_premitted = ['!', '@', '#', '$', '^','_','+', '`', '|',
+        symbols_premitted = ['!', '@', '#', '$', '^', '_', '+', '`', '|',
                              '{', '}', ':', '<', '>', '?', '/']
         white_list = []
         white_list.extend(lowercase_letters)
@@ -199,15 +237,24 @@ class uginput:
                 self._length(self.min_len, self.max_len),
                 self._check(),
                 self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                return False
 
-            return all(valid)
-        else:
-            logging(db,self.value, 'checking_username', 'username is not valid', '1')
-            return False
 
     def isValid(self):
         domain_func = {
-            'oldusername': self._isValidUsername(),
+            'self._isValidPassword': self._isValidPassword,
+            'newpassword': self._isValidPassword,
+            'oldpassword': self._isValidPassword,
+            'housenumber': self._isHouseNumberValid,
+            'streetadress': self._isValidUsername,
+            'range': self._inrange,
+            'adminname': self._isValidUsername,
+            'advisorname': self._isValidUsername,
+            'oldusername': self._isValidUsername,
             'fullname': self._isValidUsername,
             'username': self._isValidUsername,
             'password': self._isValidPassword,
@@ -237,11 +284,12 @@ class uginput:
                 self._length(self.min_len, self.max_len),
                 self._checkemail(),
                 self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                return False
 
-            return all(valid)
-        else:
-            logging(db, self.value, 'checking_username', 'username is not valid', '1')
-            return False
 
 # User
 # --------------------------------------------------------------------
@@ -318,7 +366,7 @@ class db:
         username = uginput('username', 5, 12)
         username.input('please enter username:')
         if not username.isValid():
-            logging(db, username.value, 'tried to log in but couldnt','values used are' + username.value , 1)
+            logging(db, username.value, 'tried to log in but couldnt', 'values used are' + username.value, 1)
             print('username or password is incorrect')
             return
 
@@ -434,13 +482,34 @@ class db:
                                 'mobile phone number']))
 
     def search_client(self):
+        # check fullname
+        fullname = uginput('fullname', 5, 40)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'tried to search an client, fullname incorrect','values used are' + fullname.value, 1)
+            print('username was incorrect/or not found')
+            return
 
-        fullName = encryption.encrypt(input("please enter fullname: "))
-        HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
-        zipcode = encryption.encrypt(input("please enter ZipCode: "))
+        # checking housenumber
+        housenumber = uginput('housenumber')
+        housenumber.input("please enter HouseNumber: ")
+        if not housenumber.isValid():
+            logging(db, housenumber.value, 'tried to search an client, housenumber incorrect','values used are' + housenumber.value, 1)
+            print('housenumber was incorrect/or not found')
+            return
+
+        # checking zipcode
+        zipcode = uginput('zipcode')
+        zipcode.input("please enter zipcode: ")
+        if not zipcode.isValid():
+            logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
+                    'values used are' + zipcode.value, 1)
+            print('housenumber was incorrect/or not found')
+            return
+
         self.cur.execute(
             "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-            {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+            {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
         client = self.cur.fetchone()
         decryptedList = encryption.decryptTupleToList(client)
         print(tabulate([decryptedList],
@@ -477,7 +546,16 @@ class db:
         self.menuoptions = [option[0] for option in cities]
         self.menu_display()
         try:
-            option = int(input('Choose a number from the menu: '))
+            tempoption = uginput('range', 1, 1, range=range(1,10) )
+            tempoption.intinput('Choose a number from the menu: ')
+            if not tempoption.isValid():
+                logging(db, tempoption.value, F'tried to add a number or symbol outside of menu scope, values used are: {tempoption.value}',1)
+                print('invalid option')
+            else:
+                option = tempoption
+
+
+
             print()
         except:
             option = -1
@@ -499,71 +577,222 @@ class db:
             print()
             self.menu_display()
             try:
-                option = int(input('Choose a number from the menu: '))
-                print()
+                tempoption = uginput('range', 1, 1, range=range(1, 10))
+                tempoption.intinput('Choose a number from the menu: ')
+                if not tempoption.isValid():
+                    logging(db, tempoption.value,
+                            F'tried to add a number or symbol outside of menu scope, values used are: {tempoption.value}',
+                            1)
+                    print('invalid option')
+                else:
+                    option = tempoption
             except:
                 option = -1
                 print()
 
     def add_new_client(self):
-        fullname = input("please enter fullname: ")
-        StreetAddress = input("please enter StreetAddress: ")
-        HouseNumber = input("please enter HouseNumber: ")
-        ZipCode = input("please enter ZipCode: ")
-        City = self.select_city()
-        EmailAddress = input("please enter EmailAddress: ")
-        MobilePhone = input("please enter MobilePhone +31-6-: ")
-        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname)}', '{encryption.encrypt(StreetAddress)}', '{encryption.encrypt(HouseNumber)}', '{encryption.encrypt(ZipCode)}', '{encryption.encrypt(City)}', '{encryption.encrypt(EmailAddress)}', '{encryption.encrypt('+31-6-' + MobilePhone)}')"
+        #fullname validation
+        fullname = uginput('fullname', 5, 30)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'tried to add a new client, fullname incorrect', 'values used are' + fullname.value,1)
+            print('fullname is incorrect')
+            return
+        
+        # streetadress validation
+        streetaddress = uginput('streetadress', 5, 40)
+        streetaddress.input("please enter StreetAddress: ")
+        if not streetaddress.isValid():
+            logging(db, streetaddress.value, 'tried to add a new client, fullname incorrect','values used are' + streetaddress.value, 1)
+            print('fullname is incorrect')
+            return
+       
+       #HouseNumber validation
+        housenumber = uginput('housenumber')
+        housenumber.input("please enter housenumber: ")
+        if not housenumber.isValid():
+            logging(db, housenumber.value, 'tried to add a new client, fullname incorrect','values used are' + housenumber.value, 1)
+            print('HouseNumber is incorrect')
+            return
+
+       #checking zipcode
+        zipcode = uginput('zipcode', 6, 6)
+        zipcode.input("please enter zipcode: ")
+        if not zipcode.isValid():
+            logging(db, zipcode.value, 'tried to search an client, zipcode incorrect',
+                    'values used are' + zipcode.value, 1)
+            print('Zipcode was incorrect/or not found')
+            return
+        
+        city = self.select_city()
+
+        # validating emailaddress
+
+        emailaddress = uginput('email',5,255 )
+        emailaddress.input("please enter emailaddress: ")
+        if not emailaddress.isValid():
+            logging(db, emailaddress.value, 'tried to add a client, emailaddress incorrect',
+                    'values used are' + emailaddress.value, 1)
+            print('emailaddress was incorrect')
+            return
+        
+        # validating mobile phone
+
+        mobilephone = uginput('email', 5, 255)
+        mobilephone.input("please enter MobilePhone +31-6-: ")
+        if not mobilephone.isValid():
+            logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect','values used are' + mobilephone.value, 1)
+            print('mobilephone was incorrect')
+            return
+       
+        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname.value)}', '{encryption.encrypt(streetaddress.value)}', '{encryption.encrypt(housenumber.value)}', '{encryption.encrypt(zipcode.value)}', '{encryption.encrypt(city)}', '{encryption.encrypt(emailaddress.value)}', '{encryption.encrypt('+31-6-' + mobilephone.value)}')"
         try:
             self.cur.execute(client1)
             self.conn.commit()
             print('client has been added')
-            logging(db, self.user.username, 'added new client', 'added ' + fullname, 0)
+            logging(db, self.user.username, 'added new client', 'added ' + fullname.value, 0)
         except:
-            logging(db, self.user.username, 'trying to add new client but failed','tried to add ' + fullname, 1)
+            logging(db, self.user.username, 'trying to add new client but failed', 'tried to add ' + fullname.value, 1)
             print('Failed to add client')
 
     def delete_client(self):
-        fullName = encryption.encrypt(input("please enter fullname: "))
-        HouseNumber = encryption.encrypt(input("please enter HouseNumber: "))
-        zipcode = encryption.encrypt(input("please enter ZipCode: "))
+        # validating fullname
+        fullname = uginput('fullname', 5, 40)
+        fullname.input("mobilephone was incorrect")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'trying to delete client, fullname incorrect',
+                    'values used are' + fullname.value, 1)
+            print('fullname was incorrect')
+            return
+
+        # HouseNumber validation
+        housenumber = uginput('housenumber')
+        housenumber.input("please enter housenumber: ")
+        if not housenumber.isValid():
+            logging(db, housenumber.value, 'tried to add a new client, fullname incorrect',
+                    'values used are' + housenumber.value, 1)
+            print('HouseNumber is incorrect')
+            return
+
+        # checking zipcode
+        zipcode = uginput('zipcode')
+        zipcode.input("please enter zipcode: ")
+        if not zipcode.isValid():
+            logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
+                    'values used are' + zipcode.value, 1)
+            print('housenumber was incorrect/or not found')
+            return
+        
         try:
             self.cur.execute(
                 "DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                {"fullname": fullName, "HouseNumber": HouseNumber, "zipcode": zipcode})
+                {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
             self.conn.commit()
             print('client has been deleted')
-            logging(db, self.user.username, 'client has been deleted', 'client name ' + fullName+ ' '+'client house number '+HouseNumber+' '+'client zipcode '+zipcode, 0)
+            logging(db, self.user.username, 'client has been deleted','client name ' + fullname.value + ' ' + 'client house number ' + housenumber.value + ' ' + 'client zipcode ' + zipcode.value,0)
         except:
-            logging(db, self.user.username, 'trying to delete client but failed','tried to delete ' + fullName, 1)
+            logging(db, self.user.username, 'trying to delete client but failed', 'tried to delete ' + fullname.value, 1)
             print('client deletion has failed')
 
     def modify_client(self):
-        fullName = input("please enter fullname: ")
-        HouseNumber = input("please enter HouseNumber: ")
-        zipcode = input("please enter ZipCode: ")
+        # fullname validation
+        fullname = uginput('fullname', 5, 30)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'tried to add a new client, fullname incorrect','values used are' + fullname.value, 1)
+            print('fullname is incorrect')
+            return
 
-        fullnameNew = input("please enter new fullname: ")
-        StreetAddressNew = input("please enter new StreetAddress: ")
-        HouseNumberNew = input("please enter new HouseNumber: ")
-        ZipCodeNew = input("please enter new ZipCode: ")
-        CityNew = input("please enter new City: ")
-        EmailAddressNew = input("please enter new EmailAddress: ")
-        MobilePhoneNew = int(input("please enter new MobilePhone +31-6-: "))
+        # HouseNumber validation
+        housenumber = uginput('HouseNumber')
+        housenumber.input("please enter HouseNumber: ")
+        if not housenumber.isValid():
+            logging(db, housenumber.value, 'tried to search for a new client, housenumber incorrect',
+                    'values used are' + housenumber.value, 1)
+            print('HouseNumber is incorrect')
+            return
+
+        # checking zipcode
+        zipcode = uginput('zipcode')
+        zipcode.input("please enter zipcode: ")
+        if not zipcode.isValid():
+            logging(db, zipcode.value, 'tried to search a an client, zipcode incorrect',
+                    'values used are' + zipcode.value, 1)
+            print('housenumber was incorrect/or not found')
+            return
+
+        # fullname validation
+        fullnamenew = uginput('fullname', 5, 30)
+        fullnamenew.input("please enter fullname: ")
+        if not fullnamenew.isValid():
+            logging(db, fullnamenew.value, 'tried to add a new client, fullname incorrect',
+                    'values used are' + fullnamenew.value, 1)
+            print('fullname is incorrect')
+            return
+
+        # streetadress validation
+        streetaddress = uginput('streetadress', 5, 40)
+        streetaddress.input("please enter StreetAddress: ")
+        if not streetaddress.isValid():
+            logging(db, streetaddress.value, 'tried to modify a new client, streetaddress incorrect',
+                    'values used are' + streetaddress.value, 1)
+            print('streetaddress is incorrect')
+            return
+
+        # HouseNumber validation
+        HouseNumberNew = uginput('HouseNumber')
+        HouseNumberNew.input("please enter HouseNumber: ")
+        if not HouseNumberNew.isValid():
+            logging(db, HouseNumberNew.value, 'tried to add a new client, fullname incorrect',
+                    'values used are' + HouseNumberNew.value, 1)
+            print('HouseNumber is incorrect')
+            return
+
+        # checking zipcode
+        zipcodeNew = uginput('zipcode')
+        zipcodeNew.input("please enter zipcode: ")
+        if not zipcodeNew.isValid():
+            logging(db, zipcodeNew.value, 'tried to modify an client, zipcode incorrect',
+                    'values used are' + zipcodeNew.value, 1)
+            print('zipcode was incorrect')
+            return
+
+        city = self.select_city()
+        # validating emailaddress
+
+        emailaddress = uginput('email', 5, 255)
+        emailaddress.input("please enter emailaddress: ")
+        if not emailaddress.isValid():
+            logging(db, emailaddress.value, 'tried to modify a client, emailaddress incorrect',
+                    'values used are' + emailaddress.value, 1)
+            print('emailaddress was incorrect')
+            return
+
+        # validating mobile phone
+
+        mobilephone = uginput('email', 5, 255)
+        mobilephone.input("please enter MobilePhone +31-6-: ")
+        if not mobilephone.isValid():
+            logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect',
+                    'values used are' + mobilephone.value, 1)
+            print('mobilephone was incorrect')
+            return
         try:
             self.cur.execute(
                 "UPDATE client SET fullname=:newFullname, StreetAddress=:newStreetAddress, HouseNumber=:HouseNumberNew, ZipCode=:ZipCodeNew, City=:CityNew, EmailAddress=:EmailAddressNew, MobilePhone=:MobilePhoneNew WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                {"newFullname": encryption.encrypt(fullnameNew),
-                 "newStreetAddress": encryption.encrypt(StreetAddressNew),
-                 "HouseNumberNew": encryption.encrypt(HouseNumberNew), "ZipCodeNew": encryption.encrypt(ZipCodeNew),
-                 "CityNew": encryption.encrypt(CityNew), "EmailAddressNew": encryption.encrypt(EmailAddressNew),
-                 "MobilePhoneNew": encryption.encrypt(f'{MobilePhoneNew}'), "fullname": encryption.encrypt(fullName),
-                 "HouseNumber": encryption.encrypt(HouseNumber), "zipcode": encryption.encrypt(zipcode)})
+                {"newFullname": encryption.encrypt(fullnamenew.value),
+                 "newStreetAddress": encryption.encrypt(streetaddress.value),
+                 "HouseNumberNew": encryption.encrypt(HouseNumberNew.value), "ZipCodeNew": encryption.encrypt(zipcodeNew.value),
+                 "CityNew": encryption.encrypt(city), "EmailAddressNew": encryption.encrypt(emailaddress.value),
+                 "MobilePhoneNew": encryption.encrypt(f'{mobilephone.value}'), "fullname": encryption.encrypt(fullname.value),
+                 "HouseNumber": encryption.encrypt(housenumber.value), "zipcode": encryption.encrypt(zipcode.value)})
             self.conn.commit()
             print('client has been modified')
-            logging(db, self.user.username, 'client has been modified', 'modified values' + fullnameNew+' '+StreetAddressNew+' '+HouseNumberNew+' '+ZipCodeNew+' '+CityNew+' '+EmailAddressNew+' '+MobilePhoneNew, 0)
+            logging(db, self.user.username, 'client has been modified',
+                    'modified values' + fullnamenew.value + ' ' + streetaddress.value + ' ' + HouseNumberNew.value + ' ' + zipcodeNew.value + ' ' + city + ' ' + emailaddress.value + ' ' + mobilephone.value,
+                    0)
         except:
-            logging(db, self.user.username, 'trying to modify account','tried to modify ' + fullName, 1)
+            logging(db, self.user.username, 'trying to modify account', 'tried to modify ' + fullname.value, 1)
             print('client modification has failed')
 
     def delete_user(self, role):
@@ -576,37 +805,59 @@ class db:
             logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username, 0)
             print('user has been deleted')
         except:
-            logging(db, self.user.username, 'trying to delete user but failed','tried to delete ' + username, 1)
+            logging(db, self.user.username, 'trying to delete user but failed', 'tried to delete ' + username, 1)
             print('user deletion has failed')
 
     def change_password(self):
-        oldPassword = input("please enter old password: ")
-        if (oldPassword == self.user.password):
-            newPassword = input("please enter new password: ")
-            newPasswordRepeated = input("please reenter new password: ")
-            if newPassword == newPasswordRepeated:
+        # oldpassword validation
+        oldpassword = uginput('oldpassword', 8, 30)
+        oldpassword.input("please enter old password: ")
+        if not oldpassword.isValid():
+            logging(db, oldpassword.value, 'tried to change password, old password incorrect',
+                    'values used are' + oldpassword.value, 1)
+            print('oldpassword is incorrect')
+            return
+        if (oldpassword.value == self.user.password):
+            # validate new pasword
+            newpassword = uginput('newpassword', 8, 30)
+            newpassword.input("please enter new password: ")
+            if not newpassword.isValid():
+                logging(db, newpassword.value, 'tried to change password, new password incorrect',
+                        'values used are' + newpassword.value, 1)
+                print('newpassword is incorrect')
+                return
+
+            # validate newpasswordrepeated
+            newpasswordrepeated = uginput('newpasswordrepeated', 8, 30)
+            newpasswordrepeated.input("please reenter new password: ")
+            if not newpasswordrepeated.isValid():
+                logging(db, newpasswordrepeated.value, 'tried to change password, newpasswordrepeated incorrect',
+                        'values used are' + newpasswordrepeated.value, 1)
+                print('newpasswordrepeated is incorrect')
+                return
+
+            if newpassword.value == newpasswordrepeated.value:
                 try:
-                    self.cur.execute(
-                        "UPDATE users SET password=:password, attempts=:attempts WHERE username=:username", \
-                        {"password": encryption.encrypt(newPassword), "attempts": encryption.encrypt('0'),
-                         "username": self.user.username})
+                    self.cur.execute("UPDATE users SET password=:password, attempts=:attempts WHERE username=:username", \
+                    {"password": encryption.encrypt(newpassword.value), "attempts": encryption.encrypt('0'),"username": self.user.username})
                     self.conn.commit()
                     print('advisor has been modified')
                 except:
-                    logging(db,self.user.username,'trying to change user password','tried to change pw to from '+oldPassword+' to '+newPassword, 1)
+                    logging(db, self.user.username, 'trying to change user password','tried to change pw to from ' + oldpassword.value + ' to ' + newpassword.value, 1)
                     print('advisor modification has failed')
             else:
-                logging(db, self.user.username, 'trying to change user password','password is not the same', 0)
+                logging(db, self.user.username, 'trying to change user password', 'password is not the same', 0)
                 print('password is not the same')
         else:
-            logging(db, self.user.username, 'trying to change user password','tried pw '+oldPassword+' is not the same as the tried on '+self.user.password, 1)
+            logging(db, self.user.username, 'trying to change user password',
+                    'tried pw ' + oldpassword.value + ' is not the same as the tried on ' + self.user.password, 1)
             print('password is not correct')
 
     def backup(self):
         # create a ZipFile object
         zipObj = ZipFile(f"systembackuo{now.strftime('%d-%m-%Y-%H-%M')}.zip", 'w')
         # Add multiple files to the zip
-        logging(db, self.user.username, 'made backup','made backup ' + 'null', 0)
+        logging(db, self.user.username, 'made backup', 'made backup ' + 'null', 0)
         zipObj.write('mycompany.db')
         # close the Zip File
 
@@ -624,14 +875,16 @@ class db:
         password = uginput('password', 8, 30)
         password.input("please enter password: ")
         if not password.isValid():
-            logging(db, username.value, 'tried to add a password for new advisor', 'values used are' + password.value, 1)
+            logging(db, username.value, 'tried to add a password for new advisor', 'values used are' + password.value,
+                    1)
             print('username,password or fullname is incorrect')
             return
 
         fullname = uginput('fullname', 5, 12)
         fullname.input("please enter fullname: ")
         if not fullname.isValid():
-            logging(db, username.value, 'tried to add a fullname for a new advisor', 'values used are' + fullname.value, 1)
+            logging(db, username.value, 'tried to add a fullname for a new advisor', 'values used are' + fullname.value,
+                    1)
             print('username,password or fullname is incorrect')
             return
         admin = '0'
@@ -639,18 +892,21 @@ class db:
             self.cur.execute(
                 F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)})")
             self.conn.commit()
-            logging(db, self.user.username, 'added new advisor','new values username '+username.value+' fullname '+fullname.value,0)
+            logging(db, self.user.username, 'added new advisor',
+                    'new values username ' + username.value + ' fullname ' + fullname.value, 0)
             print('advisor has been added')
         except:
-            logging(db, self.user.username, 'failed adding new advisor','new values username ' + username.value + ' fullname ' + fullname.value, 1)
+            logging(db, self.user.username, 'failed adding new advisor',
+                    'new values username ' + username.value + ' fullname ' + fullname.value, 1)
             print('advisor failed to be added')
 
     def modify_advisor(self):
         # validating oldusername
         oldusername = uginput('oldusername', 5, 12)
-        oldusername.input("please enter fullname: ")
+        oldusername.input("please enter the Username that you want to modify: ")
         if not oldusername.isValid():
-            logging(db, oldusername.value, 'tried to modify an advisor olduusername incorrect', 'values used are' + oldusername.value,1)
+            logging(db, oldusername.value, 'tried to modify an advisor olduusername incorrect',
+                    'values used are' + oldusername.value, 1)
             print('old username was incorrect/or not found')
             return
 
@@ -658,24 +914,26 @@ class db:
         username = uginput('username', 5, 12)
         username.input("please enter new username: ")
         if not username.isValid():
-            logging(db, username.value, 'tried to modify an advisor username incorrect', 'values used are' + username.value,1)
+            logging(db, username.value, 'tried to modify an advisor username incorrect',
+                    'values used are' + username.value, 1)
             print('old username was incorrect/or not found')
             return
 
-        #validating password
+        # validating password
         password = uginput('password', 8, 30)
-        password.input("please enter password: ")
+        password.input("please enter new password: ")
         if not password.isValid():
-            logging(db, username.value, 'tried to modify a password for advisor', 'values used are' + password.value,
+            logging(db, password.value, 'tried to modify a password for advisor', 'values used are' + password.value,
                     1)
             print('username,password or fullname is incorrect')
             return
 
-        #validating fullname
+        # validating fullname
         fullname = uginput('fullname', 5, 12)
         fullname.input("please enter fullname: ")
         if not fullname.isValid():
-            logging(db, username.value, 'tried to modify a fullname for a new advisor', 'values used are' + fullname.value,
+            logging(db, fullname.value, 'tried to modify a fullname for a new advisor',
+                    'values used are' + fullname.value,
                     1)
             print('username,password or fullname is incorrect')
             return
@@ -683,27 +941,46 @@ class db:
         try:
             self.cur.execute(
                 "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
-                {"username": encryption.encrypt(username), "password": encryption.encrypt(password),
-                 "fullname": encryption.encrypt(fullname),
-                 "oldUsername": encryption.encrypt(oldusername), "role": encryption.encrypt(role)})
+                {"username": encryption.encrypt(username.value), "password": encryption.encrypt(password.value),
+                 "fullname": encryption.encrypt(fullname.value),
+                 "oldUsername": encryption.encrypt(oldusername.value), "role": encryption.encrypt(role)})
             self.conn.commit()
-            logging(db, self.user.username, 'modified advisor','values modified are oldUsername' + oldusername.value +' to '+username.value+ ' fullname ' + fullname.value, 0)
+            logging(db, self.user.username, 'modified advisor',
+                    'values modified are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value,
+                    0)
             print('advisor has been modified')
         except:
-            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldUsername + ' to ' + username + ' fullname ' + fullname, 0)
+            logging(db, self.user.username, 'modified advisor failed',
+                    'tried values are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value,
+                    0)
             print('advisor modification has failed')
 
     def delete_advisor(self):
         self.delete_user('0')
 
     def reset_advisor_password(self):
-        advisorname = input("please enter Advisor username: ")
-        password = input("please enter new Advisor password: ")
+        # check advisor name
+        advisorname = uginput('advisorname', 5, 12)
+        advisorname.input("please enter Advisor username: ")
+        if not advisorname.isValid():
+            logging(db, advisorname.value, 'tried to reset an advisor, username not found',
+                    'values used are' + advisorname.value, 1)
+            print('advisor was incorrect/or not found')
+            return
+
+        # password validation
+        password = uginput('password', 8, 30)
+        password.input("please enter new Advisor password: ")
+        if not password.isValid():
+            logging(db, password.value, 'tried to reset an advisor, username not found',
+                    'values used are' + password.value, 1)
+            print('advisor was incorrect/or not found')
+            return
         role = '0'
         try:
             self.cur.execute(
                 "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(advisorname), "password": encryption.encrypt(password),
+                {"username": encryption.encrypt(advisorname.value), "password": encryption.encrypt(password.value),
                  "role": encryption.encrypt(role)})
             self.conn.commit()
             print('advisor has been modified')
@@ -711,60 +988,111 @@ class db:
             print('advisor password reset has failed')
 
     def add_new_admin(self):
-        username = input("please enter username: ")
-        password = input("please enter password: ")
-        fullname = input("please enter fullname: ")
+        # username validation
+        username = uginput('username', 5, 12)
+        username.input("please enter username: ")
+        if not username.isValid():
+            logging(db, username.value, 'tried to add new admin, username was invalid','values used are' + username.value, 1)
+            print('username incorrect')
+            return
+
+        # password valdation
+        password = uginput('password', 5, 12)
+        password.input("please enter password: ")
+        if not password.isValid():
+            logging(db, password.value, 'tried to add new admin, password was invalid','values used are' + password.value, 1)
+            print('password incorrect')
+            return
+
+        #fullname validation
+        fullname = uginput('fullname', 5, 12)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'tried to add new admin, new fullname was invalid','values used are' + fullname.value, 1)
+            print('fullname incorrect')
+            return
         admin = '1'
         try:
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
+                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)})")
             self.conn.commit()
             print('admin has been added')
         except:
             print('admin failed to be added')
 
     def modify_admin(self):
-        oldUsername = input("please enter username: ")
-        username = input("please enter new username: ")
-        password = input("please enter new password: ")
-        fullname = input("please enter new fullname: ")
+        # validating oldusername
+        oldusername = uginput('oldusername', 5, 12)
+        oldusername.input("please enter the username that you want to modify: ")
+        if not oldusername.isValid():
+            logging(db, oldusername.value, 'tried to modify an admin, username incorrect','values used are' + oldusername.value, 1)
+            print('old username was incorrect/or not found')
+            return
+
+        # validating username
+        username = uginput('username', 5, 12)
+        username.input("please enter new username: ")
+        if not username.isValid():
+            logging(db, username.value, 'tried to modify an admin, username incorrect','values used are' + username.value, 1)
+            print('old username was incorrect/or not found')
+            return
+
+        # validating password
+        password = uginput('password', 8, 30)
+        password.input("please enter new password: ")
+        if not password.isValid():
+            logging(db, username.value, 'tried to modify an admin, password incorrect', 'values used are' + password.value,1)
+            print('password is incorrect')
+            return
+
+        # validating fullname
+        fullname = uginput('fullname', 5, 12)
+        fullname.input("please enter fullname: ")
+        if not fullname.isValid():
+            logging(db, fullname.value, 'tried to modify a admin, fullname incorrect','values used are' + fullname.value,1)
+            print('fullname is incorrect')
+            return
         role = '1'
         try:
             self.cur.execute(
                 "UPDATE users SET username=:username, password=:password, fullname=:fullname WHERE username=:oldUsername and admin=:role", \
-                {"username": encryption.encrypt(username), "password": encryption.encrypt(password),
-                 "fullname": encryption.encrypt(fullname),
-                 "oldUsername": encryption.encrypt(oldUsername), "role": encryption.encrypt(role)})
+                {"username": encryption.encrypt(username.value), "password": encryption.encrypt(password.value),
+                 "fullname": encryption.encrypt(fullname.value),
+                 "oldUsername": encryption.encrypt(oldusername.value), "role": encryption.encrypt(role)})
             self.conn.commit()
+            logging(db, self.user.username, 'modified admin','values modified are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value,0)
             print('admin has been modified')
         except:
+            logging(db, self.user.username, 'modified admin failed','tried values are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value,0)
             print('admin modification has failed')
 
     def delete_admin(self):
         self.delete_user('1')
 
     def reset_admin_password(self):
-        username = uginput('username', 5, 12)
-        username.input('please enter username:')
-        if not username.isValid():
-            logging(db, self.user.username, 'Username input failed value', 'values used are ' + username.value, 1)
-            print('username or password is incorrect')
+        # check admin name
+        adminname = uginput('adminname', 5, 12)
+        adminname.input("please enter admin username: ")
+        if not adminname.isValid():
+            logging(db, adminname.value, 'tried to reset an admin, username not found','values used are' + adminname.value, 1)
+            print('admin was incorrect/or not found')
             return
 
+        # password validation
         password = uginput('password', 8, 30)
-        password.input('please enter password:')
+        password.input("please enter new admin password: ")
         if not password.isValid():
-            print('username or password is incorrect')
-            logging(db, username.value, 'tried to log in but couldnt', 'values used are ' + username.value, 1)
+            logging(db, password.value, 'tried to reset an admin, password not found','values used are' + password.value, 1)
+            print('admin was incorrect/or not found')
             return
         role = '1'
         try:
             self.cur.execute(
                 "UPDATE users SET password=:password WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(username.value), "password": encryption.encrypt(password.value),
+                {"username": encryption.encrypt(adminname.value), "password": encryption.encrypt(password.value),
                  "role": encryption.encrypt(role)})
             self.conn.commit()
-            print('admin password has been modified')
+            print('admin has been modified')
         except:
             print('admin password reset has failed')
 
