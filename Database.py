@@ -21,7 +21,9 @@ now = datetime.now()
 lowercase_letters = [chr(code) for code in range(ord('a'), ord('z') + 1)]
 uppercase_letters = [chr(code) for code in range(ord('A'), ord('Z') + 1)]
 digits = [chr(code) for code in range(ord('0'), ord('9') + 1)]
-
+symbols_premitted = ['!', '@', '#', '$', '^','_','+', '`', '|',
+                             '{', '}', ':', '<', '>', '?', '/']
+blacklist = ['-','=','(', ')','[',"'",';', ',', '.','/' '\\', ']']
 cities = [
     [1, 'Ankara'], [2, 'Marakesh'], [3, 'Samsun'], [4, 'Sivas'], [5, 'Tehran'], [6, 'Nijkerk'], [7, 'Nador'], [8, 'Istanbul'], [9, 'Gaza'], [10, 'Mashhad']
 ]
@@ -30,20 +32,27 @@ cities = [
 class logging():
 
     def __init__(self, db, username, description_of_activity, additionalinfo, suspicious):
-        self.username = encryption.encrypt(username)
-        self.date = encryption.encrypt(date.today().strftime("%d-%b-%Y"))
+
+        self.username = ''
+        x = False
+        for a in range(len(username)):
+            for car in blacklist:
+                if username[a] == car:
+                    x = True
+                    self.username += '\\' + username[a]
+            if x == False:
+                self.username += username[a]
+
+        self.username += username[a]
+        self.username = encryption.encrypt(self.username)
+
+        print(self.username)
+        self.date = encryption.encrypt(now.strftime('%d-%m-%Y'))
         self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
         self.description_of_activity = encryption.encrypt(description_of_activity)
         self.additionalinfo = encryption.encrypt(additionalinfo)
         self.suspicious = encryption.encrypt(f'{suspicious}')
-        # self.username = username
-        # self.date = date.today().strftime("%d-%b-%Y")
-        # self.time = strftime("%H:%M:%S", localtime())
-        # self.description_of_activity = description_of_activity
-        # self.additionalinfo = additionalinfo
-        # self.suspicious = f'{suspicious}'
-        client.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')")
-        # F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{username}',('{date}'),'{time}','{description_of_activity}','{additionalinfo}','{suspicious}')"
+        print(client.cur.execute(F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')"))
         client.conn.commit()
 
 # uginput class
@@ -78,8 +87,8 @@ class uginput:
             return False
 
     def _check(self):
-        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
-                        '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        symPremitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_',  '+',  '`', '|',
+                        '{', '}',  ':',  '<', '>','?', ]
         if any(x.isupper() for x in self.value) and (any(x.islower() for x in self.value)) and (
                 any(x for x in digits)) and (any(x for x in symPremitted)):
             return True
@@ -177,8 +186,8 @@ class uginput:
         if self.value is None:
             logging(db,'None', 'checking_password', 'password has null value', '1')
             return False
-        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
-                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
+        symbols_premitted = ['!', '@', '#', '$', '^','_','+', '`', '|',
+                             '{', '}', ':', '<', '>', '?', '/']
         white_list = []
         white_list.extend(lowercase_letters)
         white_list.extend(uppercase_letters)
@@ -319,7 +328,7 @@ class db:
             print('username or password is incorrect')
             return
 
-        logging(db, username.value, 'user logged in ', 'values used are' + username.value, 1)
+        logging(db, username.value, 'user logged in ', 'values used are ' + username.value, 1)
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
@@ -681,7 +690,7 @@ class db:
             logging(db, self.user.username, 'modified advisor','values modified are oldUsername' + oldusername.value +' to '+username.value+ ' fullname ' + fullname.value, 0)
             print('advisor has been modified')
         except:
-            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldusername.value + ' to ' + username.value + ' fullname ' + fullname.value, 0)
+            logging(db, self.user.username, 'modified advisor failed','tried values are oldUsername' + oldUsername + ' to ' + username + ' fullname ' + fullname, 0)
             print('advisor modification has failed')
 
     def delete_advisor(self):
@@ -738,7 +747,7 @@ class db:
         username = uginput('username', 5, 12)
         username.input('please enter username:')
         if not username.isValid():
-            logging(db, self.user.username, 'Username input failed value', 'values used are' + username.value, 1)
+            logging(db, self.user.username, 'Username input failed value', 'values used are ' + username.value, 1)
             print('username or password is incorrect')
             return
 
@@ -746,7 +755,7 @@ class db:
         password.input('please enter password:')
         if not password.isValid():
             print('username or password is incorrect')
-            logging(db, username.value, 'tried to log in but couldnt', 'values used are' + username.value, 1)
+            logging(db, username.value, 'tried to log in but couldnt', 'values used are ' + username.value, 1)
             return
         role = '1'
         try:
