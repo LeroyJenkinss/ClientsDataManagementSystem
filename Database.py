@@ -628,7 +628,7 @@ class db:
         admin = '0'
         try:
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username)}', '{encryption.encrypt(password)}', '{encryption.encrypt(fullname)}', {encryption.encrypt(admin)})")
+                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)})")
             self.conn.commit()
             logging(db, self.user.username, 'added new advisor','new values username '+username.value+' fullname '+fullname.value,0)
             print('advisor has been added')
