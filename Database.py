@@ -67,7 +67,12 @@ class uginput:
 
     def _isHouseNumberValid(self):
         if self.value is None:
-            logging(db, 'None', self.domain_type, 'username has null value', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
+            else:
+                logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
             return False
 
         white_list = []
@@ -81,12 +86,22 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, 'empty', 'checking '+self.domain_type, self.domain_type+' username is not valid', '1')
+                if client.user.username is None:
+                    logging(db, 'not logged in', f'checking_{self.domain_type}',
+                            f'{self.domain_type} is not valid value: {self.value}', '1')
+                else:
+                    logging(db, client.user.username, f'checking_{self.domain_type}',
+                            f'{self.domain_type} is not valid value: {self.value}', '1')
                 return False
 
     def _isValidUsername(self):
         if self.value is None:
-            logging(db, 'None', self.domain_type, 'username has null value', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
+            else:
+                logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
             return False
 
         symbols_premitted = ['!', '.', '_']
@@ -104,7 +119,12 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, self.domain_type, 'checking_username', 'username is not valid', '1')
+                if client.user.username is None:
+                    logging(db, 'not logged in', f'checking_{self.domain_type}',
+                            f'{self.domain_type} is not valid value: {self.value}', '1')
+                else:
+                    logging(db, client.user.username, f'checking_{self.domain_type}',
+                            f'{self.domain_type} is not valid value: {self.value}', '1')
                 return False
 
     def _check(self):
@@ -118,6 +138,11 @@ class uginput:
         return False
 
     def _checkemail(self):
+        if self.value is None:
+            logging(db, client.user.username, f'checking_{self.domain_type}',
+                    f'Is empty',
+                    '1')
+            return  False
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
         if re.match(regex, self.value):
@@ -125,6 +150,11 @@ class uginput:
         return False
 
     def _checkZip(self):
+        if self.value is None:
+            logging(db, client.user.username, f'checking_{self.domain_type}',
+                    f'Is empty',
+                    '1')
+            return False
         numbers = ['1','2','3','4','5','6','7','8','9']
         count = 0
         if self.value[0] in numbers:
@@ -141,16 +171,31 @@ class uginput:
         return True
 
     def _checktelephonenumber(self):
+        if self.value is None:
+            logging(db, client.user.username, f'checking_{self.domain_type}',
+                    f'Is empty',
+                    '1')
+            return  False
         regex = r"^[0-9]{8}"
 
         if re.match(regex, self.value):
             return True
+        logging(db, client.user.username, f'checking_{self.domain_type}',
+                f'{self.value} is not a valid phonenumber',
+                '1')
         return False
 
     def _checkwhitelist(self, white_list):
         for a in self.value:
             if a not in white_list:
-                logging(db, self.value, 'checking_all_chars_in_whitelist', a + ' is not in the whitelist', '1')
+                if client.user.username is None:
+                    logging(db, 'not logged in', f'checking_all_chars_in_whitelist_{self.domain_type}',
+                            f'{a} is not in the whitelist value: {self.value}',
+                            '1')
+                else:
+                    logging(db, client.user.username, f'checking_all_chars_in_whitelist_{self.domain_type}',
+                            f'{a} is not in the whitelist value: {self.value}',
+                            '1')
                 return False
         return True
 
@@ -164,7 +209,12 @@ class uginput:
         name = self.value
         if min <= len(name) <= max:
             return True
-        logging(db, self.value, 'checking_min&max_length', 'username is too short or too long', '1')
+        if client.user.username is None:
+            logging(db, 'not logged in', f'checking_min&max_length_{self.domain_type}', f'{self.value} is too short or too long',
+                    '1')
+        else:
+            logging(db, client.user.username, f'checking_min&max_length_{self.domain_type}',
+                    f'{self.value} is too short or too long', '1')
         return False
 
     def _checkFirstChar(self, char2Check, lowerLetters, upperLetters):
@@ -173,12 +223,17 @@ class uginput:
         elif char2Check in upperLetters:
             return True
         else:
-            logging(db, self.value, 'checking_if_firstletter_letter', 'firstChar isnt a letter', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.value} is not valid',
+                        '1')
+            else:
+                logging(db, client.user.username, f'checking_{self.domain_type}',
+                        f'{self.value} is not valid', '1')
             return False
 
     def _isValidZipcode(self):
         if self.value is None:
-            logging(db, 'None', 'checking_zipcode', 'zipcode has null value', '1')
+            logging(db, client.user.username, 'checking_zipcode', 'zipcode has null value', '1')
             return False
         white_list = []
         white_list.extend(lowercase_letters)
@@ -193,14 +248,19 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                if client.user.username is None:
+                    logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.value} is not valid',
+                            '1')
+                else:
+                    logging(db, client.user.username, f'checking_{self.domain_type}',
+                            f'{self.value} is not valid', '1')
                 return False
 
 
 
     def _isValidTelephonenumber(self):
         if self.value is None:
-            logging(db, 'None', 'checking_telephonenumber', 'telephonenumber has null value', '1')
+            logging(db, client.user.username, 'checking_telephonenumber', 'telephonenumber has null value', '1')
             return False
         white_list = []
         white_list.extend(digits)
@@ -213,17 +273,24 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                logging(db, client.user.username, 'checking_username', 'username is not valid', '1')
                 return False
 
     def _inrange(self):
         if self.value is None:
-            logging(db, client.user.username, self.domain_type, 'username has null value', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
+            else:
+                logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value', '1')
             return False
         for x in self.range:
             if x == self.value:
                 return True
-        logging(db, client.user.username, self.domain_type, 'Is not in range', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', self.domain_type, 'Is not in range', '1')
+            else:
+                logging(db, client.user.username, self.domain_type, 'Is not in range', '1')
         return False
 
     def _isValidPassword(self):
