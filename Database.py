@@ -33,26 +33,19 @@ cities = [
 class logging():
 
     def __init__(self, db, username, description_of_activity, additionalinfo, suspicious):
-
-        self.username = ''
-        x = False
-        for a in range(len(username)):
-            for car in blacklist:
-                if username[a] == car:
-                    x = True
-                    self.username += '\\' + username[a]
-            if x == False:
-                self.username += username[a]
-
-        self.username += username[a]
-        self.username = encryption.encrypt(self.username)
+        self.username = encryption.encrypt(username)
         self.date = encryption.encrypt(now.strftime('%d-%m-%Y'))
         self.time = encryption.encrypt(strftime("%H:%M:%S", localtime()))
         self.description_of_activity = encryption.encrypt(description_of_activity)
         self.additionalinfo = encryption.encrypt(additionalinfo)
         self.suspicious = encryption.encrypt(f'{suspicious}')
-        client.cur.execute(
-            F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}')")
+        self.read = encryption.encrypt(f'{0}')
+        try:
+            client.cur.execute(
+                F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious, read) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}','{self.read}')")
+        except:
+            client.cur.execute(
+                F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious, read) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{encryption.encrypt('Meta characters or unrecognized token inside')}','{encryption.encrypt('1')}','{self.read}')")
         client.conn.commit()
 
 
@@ -104,7 +97,7 @@ class uginput:
                         '1')
             return False
 
-        symbols_premitted = ['!', '.', '_']
+        symbols_premitted = ['!', '.', '_', '\'']
         white_list = []
         white_list.extend(lowercase_letters)
         white_list.extend(uppercase_letters)
@@ -176,6 +169,8 @@ class uginput:
                     f'Is empty',
                     '1')
             return  False
+
+
         regex = r"^[0-9]{8}"
 
         if re.match(regex, self.value):
@@ -287,10 +282,10 @@ class uginput:
         for x in self.range:
             if x == self.value:
                 return True
-            if client.user.username is None:
-                logging(db, 'not logged in', self.domain_type, 'Is not in range', '1')
-            else:
-                logging(db, client.user.username, self.domain_type, 'Is not in range', '1')
+        if client.user.username is None:
+            logging(db, 'not logged in', self.domain_type, 'Is not in range', '1')
+        else:
+            logging(db, client.user.username, self.domain_type, 'Is not in range', '1')
         return False
 
     def _isValidPassword(self):
@@ -301,8 +296,8 @@ class uginput:
             else:
                 logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value', '1')
             return False
-        symbols_premitted = ['!', '@', '#', '$', '^', '_', '+', '`', '|',
-                             '{', '}', ':', '<', '>', '?', '/']
+        symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '\\', '(', ')',
+                             '{', '}', '[', ':', ';', "'", '<', '>', ',', '.', '?', '/']
         white_list = []
         white_list.extend(lowercase_letters)
         white_list.extend(uppercase_letters)
@@ -328,6 +323,7 @@ class uginput:
     def isValid(self):
         domain_func = {
             'newpassword': self._isValidPassword,
+
             'oldpassword': self._isValidPassword,
             'housenumber': self._isHouseNumberValid,
             'streetadress': self._isValidUsername,
@@ -426,57 +422,47 @@ class db:
         tb_create = '''CREATE TABLE client (fullname CHAR(30) ,StreetAddress varchar(40),HouseNumber varchar(10),ZipCode varchar(6),City varchar(40),EmailAddress varchar(50),MobilePhone varchar(30))'''
         try:
             self.cur.execute(tb_create)
-            # add sample records to the db manually
-            client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt('Lili Anderson')}', '{encryption.encrypt('teststraat')}', '{encryption.encrypt('21B')}', '{encryption.encrypt('3114XE')}', '{encryption.encrypt('staddam')}', '{encryption.encrypt('test@test.nl')}', '{encryption.encrypt('+31-6-12345678')}')"
-            self.cur.execute(client1)
-            client2 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt('Anne Banwarth')}', '{encryption.encrypt('teststrfggaat')}', '{encryption.encrypt('25B')}', '{encryption.encrypt('3134XE')}', '{encryption.encrypt('staddsaddam')}', '{encryption.encrypt('tesdadasst@test.nl')}', '{encryption.encrypt('+31-6-12345678')}')"
-            self.cur.execute(client2)
             self.conn.commit()
         except:
             None
 
         # create user table if it does not exist
-        tb_create = "CREATE TABLE users (username TEXT, password TEXT, fullname TEXT, admin varchar, attempts varchar);"
+        tb_create = "CREATE TABLE users (username TEXT, password TEXT, fullname TEXT, admin varchar, attempts varchar, registerdDate varchar);"
         try:
             self.cur.execute(tb_create)
-            # add sample records to the db manually
+            # add Superadmin record to the db manually
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')})")
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('bob.l')}', '{encryption.encrypt('B0b!23')}', '{encryption.encrypt('Bob Larson')}', {encryption.encrypt('1')}, {encryption.encrypt('0')})")
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts) VALUES ('{encryption.encrypt('ivy_russel')}', '{encryption.encrypt('ivy@R123')}' , '{encryption.encrypt('Ivy Russel')}', {encryption.encrypt('0')}, {encryption.encrypt('0')})")
+                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')}, '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
             self.conn.commit()
         except:
             None
 
         # create logging table if it doesnt excist
         # sqlite3 doesnt have datetime or boolean(0 = false, 1 = true), date and time are strings and boolean is iteger
-        tb_create = "CREATE TABLE logging (username TEXT, date TEXT, time TEXT, description_of_activity TEXT, additionalInfo TEXT, supicious TEXT)"
+        tb_create = "CREATE TABLE logging (username varchar, date varchar, time varchar, description_of_activity varchar, additionalInfo varchar, supicious varchar, read varchar)"
         try:
             self.cur.execute(tb_create)
-            self.cur.execute(
-                F"INSERT INTO logging (username, date, time, description_of_activity, additionalInfo, supicious) VALUES ('{encryption.encrypt('Billy')}', '{encryption.encrypt('30-10-1979')}', '{encryption.encrypt('19:28:00')}', '{encryption.encrypt('log on')}', '{encryption.encrypt('Hassan loggedin')}', {encryption.encrypt('0')})")
             self.conn.commit()
         except:
             None
 
     def login(self):
-
+        None_User = [None,None,None,None,None]
+        self.user = user(None_User)
         username = uginput('username', 5, 12)
-        username.input('please enter username:')
+        username.input('please enter username :')
         if not username.isValid():
             logging(db, username.value, 'tried to log in but couldnt', 'values used are' + username.value, 1)
             print('username or password is incorrect')
             return
 
         password = uginput('password', 8, 30)
-        password.input('please enter password:')
+        password.input('please enter password :')
         if not password.isValid():
             print('username or password is incorrect')
             return
 
-        logging(db, username.value, 'user logged in ', 'values used are ' + username.value, 1)
+        logging(db, username.value, 'user logged in ', 'values used are ' + username.value, 0)
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
         sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
@@ -541,6 +527,16 @@ class db:
                 del db_interface
             elif self.admin_is_loggedin == '1':
                 user_type = 'System Administrator'
+                sql_statement = 'SELECT read, supicious  from logging'
+                self.cur.execute(sql_statement)
+                log = self.cur.fetchall()
+                decryptedList = encryption.decryptNestedTupleToNestedList(log)
+                sus = False
+                for l in decryptedList:
+                    if '0' == l[0] and l[1] == '1':
+                        sus = True
+                        continue
+
                 print('\n\n\n\nWelcome')
                 heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                           '▍ ' + '\n' + \
@@ -551,11 +547,23 @@ class db:
                           '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
                           'User Menu'
 
+                if sus:
+                    heading += '\n' + '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                    'SUSPICIOUS ACTIVITY DETECTED PLEASE CHECK LOGS!'
                 db_interface = user_interface(heading, db_menu_system_admin)
                 db_interface.run()
                 del db_interface
             elif self.admin_is_loggedin == '2':
                 user_type = 'Super Administrator'
+                sql_statement = 'SELECT read, supicious  from logging'
+                self.cur.execute(sql_statement)
+                log = self.cur.fetchall()
+                decryptedList = encryption.decryptNestedTupleToNestedList(log)
+                sus = False
+                for l in decryptedList:
+                    if '0' == l[0] and l[1] == '1':
+                        sus = True
+                        continue
                 print('\n\n\n\nWelcome')
                 heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                           '▍ ' + '\n' + \
@@ -566,6 +574,9 @@ class db:
                           '▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀' + '\n' + \
                           'User Menu'
 
+                if sus:
+                    heading += '\n' + '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
+                    'SUSPICIOUS ACTIVITY DETECTED PLEASE CHECK LOGS!'
                 db_interface = user_interface(heading, db_menu_super_admin)
                 db_interface.run()
                 del db_interface
@@ -584,7 +595,7 @@ class db:
     def search_client(self):
         # check fullname
         fullname = uginput('fullname', 5, 40)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, fullname.value, 'tried to search an client, fullname incorrect','values used are' + fullname.value, 1)
             print('username was incorrect/or not found')
@@ -600,7 +611,7 @@ class db:
 
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
-        zipcode.input("please enter zipcode: ")
+        zipcode.input("please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
                     'values used are' + zipcode.value, 1)
@@ -627,13 +638,13 @@ class db:
         return users
 
     def show_all_users(self):
-        sql_statement = 'SELECT username, fullname ,admin from users'
+        sql_statement = 'SELECT username, fullname ,admin, registerdDate from users'
         self.cur.execute(sql_statement)
         users = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(users)
         decryptedList = self.select_role(decryptedList)
         print(tabulate(decryptedList,
-                       headers=['username', 'fullname', 'admin']))
+                       headers=['username', 'fullname', 'admin', 'registerDate']))
 
     def menu_display(self):
         print('_________________________________\n')
@@ -693,7 +704,7 @@ class db:
     def add_new_client(self):
         #fullname validation
         fullname = uginput('fullname', 5, 30)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter):")
         if not fullname.isValid():
             logging(db, fullname.value, 'tried to add a new client, fullname incorrect', 'values used are' + fullname.value,1)
             print('fullname is incorrect')
@@ -701,7 +712,7 @@ class db:
         
         # streetadress validation
         streetaddress = uginput('streetadress', 5, 40)
-        streetaddress.input("please enter StreetAddress: ")
+        streetaddress.input("please enter StreetAddress (You must use a min of 5 and max of 40 characters in length\n First character must be a letter):")
         if not streetaddress.isValid():
             logging(db, streetaddress.value, 'tried to add a new client, fullname incorrect','values used are' + streetaddress.value, 1)
             print('fullname is incorrect')
@@ -717,7 +728,7 @@ class db:
 
        #checking zipcode
         zipcode = uginput('zipcode', 6, 6)
-        zipcode.input("please enter zipcode: ")
+        zipcode.input("please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search an client, zipcode incorrect',
                     'values used are' + zipcode.value, 1)
@@ -729,7 +740,7 @@ class db:
         # validating emailaddress
 
         emailaddress = uginput('email',5,50 )
-        emailaddress.input("please enter emailaddress: ")
+        emailaddress.input("please enter emailaddress (The email must be min 5 and max 50 characters in length): ")
         if not emailaddress.isValid():
             logging(db, emailaddress.value, 'tried to add a client, emailaddress incorrect',
                     'values used are' + emailaddress.value, 1)
@@ -739,7 +750,7 @@ class db:
         # validating mobile phone
 
         mobilephone = uginput('telephonenumber', 8, 8)
-        mobilephone.input("please enter MobilePhone +31-6-: ")
+        mobilephone.input("please enter MobilePhone +31-6- (Must have a length of 8 digits): ")
         if not mobilephone.isValid():
             logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect','values used are' + mobilephone.value, 1)
             print('mobilephone was incorrect')
@@ -758,7 +769,7 @@ class db:
     def delete_client(self):
         # validating fullname
         fullname = uginput('fullname', 5, 40)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, fullname.value, 'trying to delete client, fullname incorrect',
                     'values used are' + fullname.value, 1)
@@ -776,7 +787,7 @@ class db:
 
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
-        zipcode.input("please enter zipcode: ")
+        zipcode.input("please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
                     'values used are' + zipcode.value, 1)
@@ -797,7 +808,7 @@ class db:
     def modify_client(self):
         # fullname validation
         fullname = uginput('fullname', 5, 30)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, fullname.value, 'tried to add a new client, fullname incorrect','values used are' + fullname.value, 1)
             print('fullname is incorrect')
@@ -814,7 +825,7 @@ class db:
 
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
-        zipcode.input("please enter zipcode: ")
+        zipcode.input("please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search a an client, zipcode incorrect',
                     'values used are' + zipcode.value, 1)
@@ -832,7 +843,7 @@ class db:
 
         # streetadress validation
         streetaddress = uginput('streetadress', 5, 40)
-        streetaddress.input("please enter StreetAddress: ")
+        streetaddress.input("please enter StreetAddress: (You must use a min of 5 and max of 40 characters in length\n First character must be a letter)")
         if not streetaddress.isValid():
             logging(db, streetaddress.value, 'tried to modify a new client, streetaddress incorrect',
                     'values used are' + streetaddress.value, 1)
@@ -871,7 +882,7 @@ class db:
         # validating mobile phone
 
         mobilephone = uginput('email', 5, 255)
-        mobilephone.input("please enter MobilePhone +31-6-: ")
+        mobilephone.input("please enter MobilePhone +31-6- (Must have a length of 8 digits): ")
         if not mobilephone.isValid():
             logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect',
                     'values used are' + mobilephone.value, 1)
@@ -987,7 +998,7 @@ class db:
             return
 
         fullname = uginput('fullname', 5, 12)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, username.value, 'tried to add a fullname for a new advisor', 'values used are' + fullname.value,
                     1)
@@ -996,7 +1007,7 @@ class db:
         admin = '0'
         try:
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)})")
+                F"INSERT INTO users (username, password, fullname, admin, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)}, '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
             self.conn.commit()
             logging(db, self.user.username, 'added new advisor',
                     'new values username ' + username.value + ' fullname ' + fullname.value, 0)
@@ -1036,7 +1047,7 @@ class db:
 
         # validating fullname
         fullname = uginput('fullname', 5, 12)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, fullname.value, 'tried to modify a fullname for a new advisor',
                     'values used are' + fullname.value,
@@ -1112,7 +1123,7 @@ class db:
 
         #fullname validation
         fullname = uginput('fullname', 5, 12)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, self.user.username, 'tried to add new admin, new fullname was invalid','values used are' + fullname.value, 1)
             print('fullname incorrect')
@@ -1153,7 +1164,7 @@ class db:
 
         # validating fullname
         fullname = uginput('fullname', 5, 12)
-        fullname.input("please enter fullname: ")
+        fullname.input("please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
         if not fullname.isValid():
             logging(db, fullname.value, 'tried to modify a admin, fullname incorrect','values used are' + fullname.value,1)
             print('fullname is incorrect')
@@ -1208,7 +1219,11 @@ class db:
         log = self.cur.fetchall()
         decryptedList = encryption.decryptNestedTupleToNestedList(log)
         print(tabulate(decryptedList,
-                       headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious']))
+                       headers=['username', 'date', 'time', 'description_of_activity', 'additionalInfo', 'supicious', 'read']))
+        self.cur.execute(
+            "UPDATE logging SET read=:read", \
+            {"read": encryption.encrypt('1'),})
+        self.conn.commit()
 
     def logout(self):
         self.loggedin = 0
