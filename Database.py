@@ -125,15 +125,20 @@ class uginput:
         return False
 
     def _checkZip(self):
-        # regex = r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$"
-        # print(re.search(regex, self.value))
-        # print(re.matchh(regex, self.value))
-        x = re.search(r"^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$", self.value)
-        print(x)
-        if x:
-            return True
+        numbers = ['1','2','3','4','5','6','7','8','9']
+        count = 0
+        if self.value[0] in numbers:
+            while count < 4:
+                if self.value[count] not in digits:
+                    return False
+                count += 1
+            while count < 6:
+                if self.value[count] not in lowercase_letters and self.value[count] not in uppercase_letters:
+                    return  False
+                count += 1
         else:
             return False
+        return True
 
     def _checktelephonenumber(self):
         regex = r"^[0-9]{8}"
@@ -546,13 +551,13 @@ class db:
         self.menuoptions = [option[0] for option in cities]
         self.menu_display()
         try:
-            tempoption = uginput('range', 1, 1, range=range(1,10) )
+            tempoption = uginput('range', 1, 1, range=range(1,11) )
             tempoption.intinput('Choose a number from the menu: ')
             if not tempoption.isValid():
                 logging(db, tempoption.value, F'tried to add a number or symbol outside of menu scope, values used are: {tempoption.value}',1)
                 print('invalid option')
             else:
-                option = tempoption
+                option = tempoption.value
 
 
 
@@ -577,7 +582,7 @@ class db:
             print()
             self.menu_display()
             try:
-                tempoption = uginput('range', 1, 1, range=range(1, 10))
+                tempoption = uginput('range', 1, 1, range=range(1, 11))
                 tempoption.intinput('Choose a number from the menu: ')
                 if not tempoption.isValid():
                     logging(db, tempoption.value,
@@ -585,7 +590,7 @@ class db:
                             1)
                     print('invalid option')
                 else:
-                    option = tempoption
+                    option = tempoption.value
             except:
                 option = -1
                 print()
@@ -628,7 +633,7 @@ class db:
 
         # validating emailaddress
 
-        emailaddress = uginput('email',5,255 )
+        emailaddress = uginput('email',5,50 )
         emailaddress.input("please enter emailaddress: ")
         if not emailaddress.isValid():
             logging(db, emailaddress.value, 'tried to add a client, emailaddress incorrect',
@@ -638,7 +643,7 @@ class db:
         
         # validating mobile phone
 
-        mobilephone = uginput('email', 5, 255)
+        mobilephone = uginput('telephonenumber', 8, 8)
         mobilephone.input("please enter MobilePhone +31-6-: ")
         if not mobilephone.isValid():
             logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect','values used are' + mobilephone.value, 1)
@@ -658,7 +663,7 @@ class db:
     def delete_client(self):
         # validating fullname
         fullname = uginput('fullname', 5, 40)
-        fullname.input("mobilephone was incorrect")
+        fullname.input("please enter fullname: ")
         if not fullname.isValid():
             logging(db, fullname.value, 'trying to delete client, fullname incorrect',
                     'values used are' + fullname.value, 1)
