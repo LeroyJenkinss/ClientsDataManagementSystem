@@ -218,11 +218,12 @@ class uginput:
 
     def _inrange(self):
         if self.value is None:
-            logging(db, 'None', self.domain_type, 'username has null value', '1')
+            logging(db, client.user.username, self.domain_type, 'username has null value', '1')
             return False
         for x in self.range:
             if x == self.value:
                 return True
+        logging(db, client.user.username, self.domain_type, 'Is not in range', '1')
         return False
 
     def _isValidPassword(self):
@@ -531,7 +532,7 @@ class db:
             return
 
         # checking zipcode
-        zipcode = uginput('zipcode')
+        zipcode = uginput('zipcode', 6, 6)
         zipcode.input("please enter zipcode: ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
@@ -1046,7 +1047,7 @@ class db:
         fullname = uginput('fullname', 5, 12)
         fullname.input("please enter fullname: ")
         if not fullname.isValid():
-            logging(db, fullname.value, 'tried to add new admin, new fullname was invalid','values used are' + fullname.value, 1)
+            logging(db, self.user.username, 'tried to add new admin, new fullname was invalid','values used are' + fullname.value, 1)
             print('fullname incorrect')
             return
         admin = '1'
