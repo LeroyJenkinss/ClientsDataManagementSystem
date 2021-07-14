@@ -227,7 +227,11 @@ class uginput:
 
     def _isValidPassword(self):
         if self.value is None:
-            logging(db, 'None', 'checking_password', 'password has null value', '1')
+            if client.user.username is None:
+                logging(db, 'not logged in', f'checking_{self.domain_type}', f'{self.domain_type} has null value',
+                        '1')
+            else:
+                logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value', '1')
             return False
         symbols_premitted = ['!', '@', '#', '$', '^', '_', '+', '`', '|',
                              '{', '}', ':', '<', '>', '?', '/']
@@ -245,13 +249,16 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                if client.user.username is None:
+                    logging(db, 'not logged in', f'checking_{self.domain_type}',
+                            f'{self.domain_type} is not valid', '1')
+                else:
+                    logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} is not valid value: {self.value}', '1')
                 return False
 
 
     def isValid(self):
         domain_func = {
-            'self._isValidPassword': self._isValidPassword,
             'newpassword': self._isValidPassword,
             'oldpassword': self._isValidPassword,
             'housenumber': self._isHouseNumberValid,
@@ -260,7 +267,7 @@ class uginput:
             'adminname': self._isValidUsername,
             'advisorname': self._isValidUsername,
             'oldusername': self._isValidUsername,
-            'fullname': self._isValidUsername,
+            'fullname': self._isValidFullname,
             'username': self._isValidUsername,
             'password': self._isValidPassword,
             'email': self._isValidEmail,
@@ -273,7 +280,7 @@ class uginput:
 
     def _isValidEmail(self):
         if self.value is None:
-            logging(db, 'None', 'checking_emailadress', 'email has null value', '1')
+            logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} has null value', '1')
             return False
 
         symbols_premitted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '_', '-', '+', '=', '`', '|', '(', ')',
@@ -292,10 +299,30 @@ class uginput:
             if all(valid):
                 return True
             else:
-                logging(db, 'empty', 'checking_username', 'username is not valid', '1')
+                logging(db, client.user.username, f'checking_{self.domain_type}', f'{self.domain_type} is not valid', '1')
                 return False
 
+    def _isValidFullname(self):
+        if self.value is None:
+            logging(db, client.user.username, self.domain_type, 'fullname has null value', '1')
+            return False
 
+        symbols_premitted = ['.', '_', ' ']
+        white_list = []
+        white_list.extend(lowercase_letters)
+        white_list.extend(uppercase_letters)
+        white_list.extend(symbols_premitted)
+
+        if self.value:
+            valid = [
+                self._length(self.min_len, self.max_len),
+                self._checkFirstChar(str(self.value[0]), lowercase_letters, uppercase_letters),
+                self._checkwhitelist(white_list)]
+            if all(valid):
+                return True
+            else:
+                logging(db, client.user.username, 'checking_fullname', 'fullname is not valid', '1')
+                return False
 # User
 # --------------------------------------------------------------------
 class user:
@@ -680,7 +707,7 @@ class db:
             return
 
         # checking zipcode
-        zipcode = uginput('zipcode')
+        zipcode = uginput('zipcode', 6, 6)
         zipcode.input("please enter zipcode: ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
@@ -691,7 +718,7 @@ class db:
         try:
             self.cur.execute(
                 "DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-                {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
+                {"fullname": encryption.encrypt(fullname.value), "HouseNumber": encryption.encrypt(housenumber.value), "zipcode": encryption.encrypt(zipcode.value)})
             self.conn.commit()
             print('client has been deleted')
             logging(db, self.user.username, 'client has been deleted','client name ' + fullname.value + ' ' + 'client house number ' + housenumber.value + ' ' + 'client zipcode ' + zipcode.value,0)
@@ -718,7 +745,7 @@ class db:
             return
 
         # checking zipcode
-        zipcode = uginput('zipcode')
+        zipcode = uginput('zipcode', 6, 6)
         zipcode.input("please enter zipcode: ")
         if not zipcode.isValid():
             logging(db, zipcode.value, 'tried to search a an client, zipcode incorrect',
@@ -801,16 +828,22 @@ class db:
             print('client modification has failed')
 
     def delete_user(self, role):
-        username = input("please enter username: ")
+        username = uginput('username', 5, 40)
+        username.input("please enter username: ")
+        if not username.isValid():
+            logging(db, username.value, 'tried to add a client, username incorrect',
+                    'values used are' + username.value, 1)
+            print('username was incorrect')
+            return
         try:
             self.cur.execute(
                 "DELETE FROM users WHERE username=:username and admin=:role", \
                 {"username": encryption.encrypt(username), "role": encryption.encrypt(role)})
             self.conn.commit()
-            logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username, 0)
+            logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username.value, 0)
             print('user has been deleted')
         except:
-            logging(db, self.user.username, 'trying to delete user but failed', 'tried to delete ' + username, 1)
+            logging(db, self.user.username, 'trying to delete user but failed', 'tried to delete ' + username.value, 1)
             print('user deletion has failed')
 
     def change_password(self):
