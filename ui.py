@@ -1,8 +1,5 @@
 from sqlite3.dbapi2 import OperationalError
 
-from ClientsDataManagementSystem.Database import logging, uginput, db
-
-
 class user_interface:
 
 
@@ -26,15 +23,7 @@ class user_interface:
     def run(self):
         self.menu_display()
         try:
-            tempoption = uginput('range', 1, 2, range=range(0, len(self.menuoptions)))
-            tempoption.intinput('Choose a number from the menu: ')
-            if not tempoption.isValid():
-                logging(db, 'not loggedin yet',
-                        F'tried to add a number or symbol outside of menu scope, values used are: {tempoption.value}',
-                        1)
-                print('invalid option')
-            else:
-                option = tempoption.value
+            option = int(input('Choose a number from the menu: '))
             print()
         except:
             option = -1
@@ -45,28 +34,20 @@ class user_interface:
                 if self.menuitems == self.default_menu:
                     self.default_no_menuitems()
                 else:
-                    try:
-                        func_return = self.menuitems[self.menuoptions.index(option)][2]()
-                        if func_return == 0:
-                            option = 0
-                            continue
-                    except:
-                        print('Error!')
+                    # try:
+                    func_return = self.menuitems[self.menuoptions.index(option)][2]()
+                    if func_return == 0:
+                        option = 0
+                        continue
+                    # except:
+                    #     print('Error!')
             else:
                 print('invalid option')
 
             print()
             self.menu_display()
             try:
-                tempoption = uginput('range', 1, 2, range=range(0, len(self.menuoptions)))
-                tempoption.intinput('Choose a number from the menu: ')
-                if not tempoption.isValid():
-                    logging(db, 'not loggedin yet',
-                            F'tried to add a number or symbol outside of menu scope, values used are: {tempoption.value}',
-                            1)
-                    print('invalid option')
-                else:
-                    option = tempoption.value
+                option = int(input('Choose a number from the menu: '))
                 print()
             except:
                 option = -1

@@ -471,7 +471,7 @@ class db:
 
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
-            logging(username.value, 'attempt_login_failed password = ' + password.value,
+            logging(db, username.value, 'attempt_login_failed password = ' + password.value,
                     'username is not valid', '1')
             print('username or password is incorrect')
             self.cur.execute(
@@ -1007,7 +1007,7 @@ class db:
         admin = '0'
         try:
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)}, '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
+                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)},'{encryption.encrypt('1')}', '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
             self.conn.commit()
             logging(db, self.user.username, 'added new advisor',
                     'new values username ' + username.value + ' fullname ' + fullname.value, 0)
@@ -1131,7 +1131,7 @@ class db:
         admin = '1'
         try:
             self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)})")
+                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)}, '{encryption.encrypt('1')}', '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
             self.conn.commit()
             print('admin has been added')
         except:
