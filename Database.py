@@ -40,12 +40,14 @@ class logging():
         self.additionalinfo = encryption.encrypt(additionalinfo)
         self.suspicious = encryption.encrypt(f'{suspicious}')
         self.read = encryption.encrypt(f'{0}')
+
+        sql_statement = '''INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious, read) VALUES(?,?,?,?,?,?,?)'''
+        values_to_insert1 = (self.username, self.date, self.time, self.description_of_activity, self.additionalinfo, self.suspicious, self.read)
+        values_to_insert2 = (self.username, self.date, self.time, self.description_of_activity, encryption.encrypt('Meta characters or unrecognized token inside'), encryption.encrypt('1'), self.read)
         try:
-            client.cur.execute(
-                F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious, read) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{self.additionalinfo}','{self.suspicious}','{self.read}')")
+            client.cur.execute(sql_statement, values_to_insert1)
         except:
-            client.cur.execute(
-                F"INSERT INTO logging (username, date, time, description_of_activity, additionalinfo, supicious, read) VALUES ('{self.username}','{self.date}','{self.time}','{self.description_of_activity}','{encryption.encrypt('Meta characters or unrecognized token inside')}','{encryption.encrypt('1')}','{self.read}')")
+            client.cur.execute(sql_statement, values_to_insert2)
         client.conn.commit()
 
 
@@ -434,8 +436,9 @@ class db:
         try:
             self.cur.execute(tb_create)
             # add Superadmin record to the db manually
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt('superadmin')}', '{encryption.encrypt('Admin!23')}', '{encryption.encrypt('Bob SuperAdmin')}', {encryption.encrypt('2')}, {encryption.encrypt('0')}, '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
+            sql_statement = '''INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES(?,?,?,?,?,?)'''
+            valuesToInstert = (encryption.encrypt('superadmin'), encryption.encrypt('Admin!23'),encryption.encrypt('Bob SuperAdmin'), encryption.encrypt('2'), encryption.encrypt('0'),encryption.encrypt(now.strftime('%d-%m-%Y')))
+            self.cur.execute(sql_statement, valuesToInstert)
             self.conn.commit()
         except:
             None
@@ -787,10 +790,10 @@ class db:
                 print('mobilephone was incorrect')
             else:
                 check = True
-
-        client1 = F"INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress, MobilePhone) VALUES ('{encryption.encrypt(fullname.value)}', '{encryption.encrypt(streetaddress.value)}', '{encryption.encrypt(housenumber.value)}', '{encryption.encrypt(zipcode.value)}', '{encryption.encrypt(city)}', '{encryption.encrypt(emailaddress.value)}', '{encryption.encrypt('+31-6-' + mobilephone.value)}')"
+        sql_statement = '''INSERT INTO client (fullname, StreetAddress, HouseNumber, ZipCode, City, EmailAddress,MobilePhone) VALUES(?,?,?,?,?,?,?)'''
+        values_to_insert = (encryption.encrypt(fullname.value), encryption.encrypt(streetaddress.value), encryption.encrypt(housenumber.value), encryption.encrypt(zipcode.value), encryption.encrypt(city), encryption.encrypt(emailaddress.value),encryption.encrypt('+31-6-' + mobilephone.value))
         try:
-            self.cur.execute(client1)
+            self.cur.execute(sql_statement, values_to_insert)
             self.conn.commit()
             print('client has been added')
             logging(db, self.user.username, 'added new client', 'added ' + fullname.value, 0)
@@ -1114,8 +1117,9 @@ class db:
                 check = True
         admin = '0'
         try:
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)},'{encryption.encrypt('1')}', '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
+            sql_statement = '''INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES(?,?,?,?,?,?)'''
+            valuesToInstert = (encryption.encrypt(username.value), encryption.encrypt(password.value), encryption.encrypt(fullname.value), encryption.encrypt(admin), encryption.encrypt('1'), encryption.encrypt(now.strftime('%d-%m-%Y')))
+            self.cur.execute(sql_statement,valuesToInstert)
             self.conn.commit()
             logging(db, self.user.username, 'added new advisor',
                     'new values username ' + username.value + ' fullname ' + fullname.value, 0)
@@ -1272,8 +1276,10 @@ class db:
 
         admin = '1'
         try:
-            self.cur.execute(
-                F"INSERT INTO users (username, password, fullname, admin, attempts, registerdDate) VALUES ('{encryption.encrypt(username.value)}', '{encryption.encrypt(password.value)}', '{encryption.encrypt(fullname.value)}', {encryption.encrypt(admin)}, '{encryption.encrypt('1')}', '{encryption.encrypt(now.strftime('%d-%m-%Y'))}')")
+            sql_statement = '''INSERT INTO users(username,password,fullname,admin,attempts,registerdDate)VALUES(?,?,?,?,?,?)'''
+            valuesToInstert = (encryption.encrypt(username.value), encryption.encrypt(password.value),encryption.encrypt(fullname.value), encryption.encrypt(admin), encryption.encrypt('1'),encryption.encrypt(now.strftime('%d-%m-%Y')))
+            self.cur.execute(sql_statement, valuesToInstert)
+            self.cur.execute(sql_statement,valuesToInstert)
             self.conn.commit()
             print('admin has been added')
         except:
