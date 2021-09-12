@@ -1108,7 +1108,7 @@ class db:
         try:
             self.cur.execute(
                 "DELETE FROM users WHERE username=:username and admin=:role", \
-                {"username": encryption.encrypt(username), "role": encryption.encrypt(role)})
+                {"username": encryption.encrypt(username.value), "role": encryption.encrypt(role)})
             self.conn.commit()
             logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username.value, 0)
             print('user has been deleted')
