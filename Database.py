@@ -604,25 +604,33 @@ class db:
     def search_client(self):
         # check fullname
         fullname = uginput('fullname', 5, 40)
-        fullname.input(
-            "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
-        if not fullname.isValid():
-            logging(db, fullname.value, 'tried to search an client, fullname incorrect',
-                    'values used are' + fullname.value, 1)
-            print('username was incorrect/or not found')
-            return
-
-        self.cur.execute(
-            "SELECT * FROM client WHERE fullname=:fullname ", \
-            {"fullname": encryption.encrypt(fullname.value)})
-        clients = self.cur.fetchall()
-        if clients != None:
-            decryptedList = encryption.decryptNestedTupleToNestedList(clients)
-            print(tabulate([decryptedList],
-                           headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
-                                    'mobile phone number']))
-        else:
-            print('Client not found')
+        count = 0
+        check = False
+        while not check:
+            if count >= 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
+            fullname.input(
+                "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
+            if not fullname.isValid():
+                logging(db, fullname.value, 'tried to search an client, fullname incorrect',
+                        'values used are' + fullname.value, 1)
+                print('username was incorrect/or not found')
+            else:
+                check = True
+            if fullname.isValid():
+                self.cur.execute(
+                    "SELECT * FROM client WHERE fullname=:fullname ", \
+                    {"fullname": encryption.encrypt(fullname.value)})
+                clients = self.cur.fetchall()
+                if clients != None:
+                    decryptedList = encryption.decryptNestedTupleToNestedList(clients)
+                    print(tabulate([decryptedList],
+                                   headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
+                                            'mobile phone number']))
+                else:
+                    print('Client not found')
 
     def select_role(self, users):
         for u in users:
