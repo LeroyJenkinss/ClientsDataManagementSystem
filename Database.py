@@ -150,6 +150,8 @@ class uginput:
                     f'Is empty',
                     '1')
             return False
+        if len(self.value) != 6:
+            return False
         numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
         count = 0
         if self.value[0] in numbers:
@@ -507,7 +509,7 @@ class db:
                     print('\n\n\n\nWelcome')
                     heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                               '▍ ' + '\n' + \
-                              '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                              '▍ Username: ' + colored(username.value, 'red') + '\n' + \
                               '▍ ' + '\n' + \
                               '▍ User type: ' + colored(user_type, 'red') + '\n' + \
                               '▍ ' + '\n' + \
@@ -522,7 +524,7 @@ class db:
                 print('\n\n\n\nWelcome')
                 heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                           '▍ ' + '\n' + \
-                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ Username: ' + colored(username.value, 'red') + '\n' + \
                           '▍ ' + '\n' + \
                           '▍ User type: ' + colored(user_type, 'red') + '\n' + \
                           '▍ ' + '\n' + \
@@ -547,7 +549,7 @@ class db:
                 print('\n\n\n\nWelcome')
                 heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                           '▍ ' + '\n' + \
-                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ Username: ' + colored(username.value, 'red') + '\n' + \
                           '▍ ' + '\n' + \
                           '▍ User type: ' + colored(user_type, 'red') + '\n' + \
                           '▍ ' + '\n' + \
@@ -888,18 +890,26 @@ class db:
 
         try:
             self.cur.execute(
+                "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+                {"fullname": encryption.encrypt(fullname.value), "HouseNumber": encryption.encrypt(housenumber.value),
+                 "zipcode": encryption.encrypt(zipcode.value)})
+            self.conn.commit()
+            if self.cur.fetchone() == None:
+                raise Exception('userNot found')
+            self.cur.execute(
                 "DELETE FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
                 {"fullname": encryption.encrypt(fullname.value), "HouseNumber": encryption.encrypt(housenumber.value),
                  "zipcode": encryption.encrypt(zipcode.value)})
             self.conn.commit()
+            print(self.cur.fetchone())
             print('client has been deleted')
             logging(db, self.user.username, 'client has been deleted',
                     'client name ' + fullname.value + ' ' + 'client house number ' + housenumber.value + ' ' + 'client zipcode ' + zipcode.value,
                     0)
         except:
-            logging(db, self.user.username, 'trying to delete client but failed', 'tried to delete ' + fullname.value,
+            logging(db, self.user.username, 'trying to delete client but failed, client doesnt exist', 'tried to delete ' + fullname.value,
                     1)
-            print('client deletion has failed')
+            print('client deletion has failed, because client doesnt exist')
 
     def modify_client(self):
         # fullname validation
@@ -921,7 +931,7 @@ class db:
                 check = True
 
         # HouseNumber validation
-        housenumber = uginput('HouseNumber')
+        housenumber = uginput('housenumber')
         check = False
         count = 0
         while not check:
@@ -935,7 +945,7 @@ class db:
                         'values used are' + housenumber.value, 1)
                 print('HouseNumber is incorrect')
             else:
-                check = False
+                check = True
 
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
@@ -955,6 +965,13 @@ class db:
             else:
                 check = True
 
+        self.cur.execute(
+            "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
+            {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
+        client = self.cur.fetchone()
+        if client == None:
+            print('Client does not exist please try again.')
+            return
         # fullname validation
         fullnamenew = uginput('fullname', 5, 30)
         check = False
@@ -991,7 +1008,7 @@ class db:
                 check = True
 
         # HouseNumber validation
-        HouseNumberNew = uginput('HouseNumber')
+        HouseNumberNew = uginput('housenumber')
         check = False
         count = 0
         while not check:
@@ -1104,8 +1121,8 @@ class db:
             logging(db, self.user.username, 'user has been deleted', 'name deleted user ' + username.value, 0)
             print('user has been deleted')
         except:
-            logging(db, self.user.username, 'trying to delete user but failed', 'tried to delete ' + username.value, 1)
-            print('user deletion has failed')
+            logging(db, self.user.username, 'trying to delete user but failed(not found)', 'tried to delete ' + username.value, 1)
+            print('user not found')
 
     def change_password(self):
         # oldpassword validation
@@ -1450,7 +1467,6 @@ class db:
             sql_statement = '''INSERT INTO users(username,password,fullname,admin,attempts,registerdDate)VALUES(?,?,?,?,?,?)'''
             valuesToInstert = (encryption.encrypt(username.value), encryption.encrypt(password.value),encryption.encrypt(fullname.value), encryption.encrypt(admin), encryption.encrypt('1'),encryption.encrypt(now.strftime('%d-%m-%Y')))
             self.cur.execute(sql_statement, valuesToInstert)
-            self.cur.execute(sql_statement,valuesToInstert)
             self.conn.commit()
             print('admin has been added')
         except:
