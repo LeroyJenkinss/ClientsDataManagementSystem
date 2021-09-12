@@ -612,33 +612,17 @@ class db:
             print('username was incorrect/or not found')
             return
 
-        # checking housenumber
-        housenumber = uginput('housenumber')
-        housenumber.input("please enter HouseNumber: ")
-        if not housenumber.isValid():
-            logging(db, housenumber.value, 'tried to search an client, housenumber incorrect',
-                    'values used are' + housenumber.value, 1)
-            print('housenumber was incorrect/or not found')
-            return
-
-        # checking zipcode
-        zipcode = uginput('zipcode', 6, 6)
-        zipcode.input(
-            "please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
-        if not zipcode.isValid():
-            logging(db, zipcode.value, 'tried to search an client, housenumber incorrect',
-                    'values used are' + zipcode.value, 1)
-            print('housenumber was incorrect/or not found')
-            return
-
         self.cur.execute(
-            "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-            {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
-        client = self.cur.fetchone()
-        decryptedList = encryption.decryptTupleToList(client)
-        print(tabulate([decryptedList],
-                       headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
-                                'mobile phone number']))
+            "SELECT * FROM client WHERE fullname=:fullname ", \
+            {"fullname": encryption.encrypt(fullname.value)})
+        clients = self.cur.fetchall()
+        if clients != None:
+            decryptedList = encryption.decryptNestedTupleToNestedList(clients)
+            print(tabulate([decryptedList],
+                           headers=['fullname', 'streetaddress', 'housenumber', 'zipcode', 'city', 'email address',
+                                    'mobile phone number']))
+        else:
+            print('Client not found')
 
     def select_role(self, users):
         for u in users:
