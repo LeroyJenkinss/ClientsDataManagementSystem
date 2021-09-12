@@ -967,7 +967,7 @@ class db:
 
         self.cur.execute(
             "SELECT * FROM client WHERE fullname=:fullname AND HouseNumber=:HouseNumber AND zipcode=:zipcode", \
-            {"fullname": fullname.value, "HouseNumber": housenumber.value, "zipcode": zipcode.value})
+            {"fullname": encryption.encrypt(fullname.value), "HouseNumber": encryption.encrypt(housenumber.value), "zipcode": encryption.encrypt(zipcode.value)})
         client = self.cur.fetchone()
         if client == None:
             print('Client does not exist please try again.')
@@ -1025,7 +1025,7 @@ class db:
                 check = True
 
         # checking zipcode
-        zipcodeNew = uginput('zipcode')
+        zipcodeNew = uginput('zipcode', 6, 6)
         check = False
         count = 0
         while not check:
@@ -1062,7 +1062,7 @@ class db:
 
         # validating mobile phone
 
-        mobilephone = uginput('email', 5, 255)
+        mobilephone = uginput('telephonenumber', 8, 8)
         check = False
         count = 0
         while not check:
@@ -1489,6 +1489,14 @@ class db:
                 print('old username was incorrect/or not found')
             else:
                 Check = True
+                self.cur.execute(
+                    "SELECT * FROM users WHERE username=:oldusername", \
+                    {"oldusername": encryption.encrypt(oldusername.value)})
+                user = self.cur.fetchone()
+                if user == None:
+                    print('User does not exist please try again.')
+                    Check = False
+
 
         # validating username
         username = uginput('username', 5, 12)
