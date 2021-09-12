@@ -184,7 +184,7 @@
       <option name="presentableId" value="Default" />
       <updated>1622285574705</updated>
       <workItem from="1631309908564" duration="15000" />
-      <workItem from="1631437251500" duration="2946000" />
+      <workItem from="1631437251500" duration="7988000" />
     </task>
     <servers />
   </component>
@@ -208,7 +208,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/ClientsDataManagementSystem$CDMS.coverage" NAME="CDMS Coverage Results" MODIFIED="1631439527787" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ClientsDataManagementSystem$CDMS.coverage" NAME="CDMS Coverage Results" MODIFIED="1631448751679" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ClientsDataManagementSystem$DatabaseConnection.coverage" NAME="DatabaseConnection Coverage Results" MODIFIED="1631437633471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

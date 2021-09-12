@@ -716,7 +716,12 @@ class db:
         # fullname validation
         fullname = uginput('fullname', 5, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter):")
             if not fullname.isValid():
@@ -729,7 +734,12 @@ class db:
         # streetadress validation
         streetaddress = uginput('streetadress', 5, 40)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             streetaddress.input(
                 "please enter StreetAddress (You must use a min of 5 and max of 40 characters in length\n First character must be a letter):")
             if not streetaddress.isValid():
@@ -742,7 +752,12 @@ class db:
         # HouseNumber validation
         housenumber = uginput('housenumber')
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             housenumber.input("please enter housenumber: ")
             if not housenumber.isValid():
                 logging(db, housenumber.value, 'tried to add a new client, fullname incorrect',
@@ -754,7 +769,12 @@ class db:
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             zipcode.input(
                 "please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
             if not zipcode.isValid():
@@ -770,7 +790,12 @@ class db:
 
         emailaddress = uginput('email', 5, 50)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             emailaddress.input("please enter emailaddress (The email must be min 5 and max 50 characters in length): ")
             if not emailaddress.isValid():
                 logging(db, emailaddress.value, 'tried to add a client, emailaddress incorrect',
@@ -783,7 +808,12 @@ class db:
 
         mobilephone = uginput('telephonenumber', 8, 8)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             mobilephone.input("please enter MobilePhone +31-6- (Must have a length of 8 digits): ")
             if not mobilephone.isValid():
                 logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect',
@@ -806,7 +836,12 @@ class db:
         # validating fullname
         fullname = uginput('fullname', 5, 40)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -819,7 +854,12 @@ class db:
         # HouseNumber validation
         housenumber = uginput('housenumber')
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             housenumber.input("please enter housenumber: ")
             if not housenumber.isValid():
                 logging(db, housenumber.value, 'tried to add a new client, fullname incorrect',
@@ -831,7 +871,12 @@ class db:
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             zipcode.input(
                 "please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
             if not zipcode.isValid():
@@ -860,7 +905,12 @@ class db:
         # fullname validation
         fullname = uginput('fullname', 5, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -873,7 +923,12 @@ class db:
         # HouseNumber validation
         housenumber = uginput('HouseNumber')
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             housenumber.input("please enter HouseNumber: ")
             if not housenumber.isValid():
                 logging(db, housenumber.value, 'tried to search for a new client, housenumber incorrect',
@@ -885,7 +940,12 @@ class db:
         # checking zipcode
         zipcode = uginput('zipcode', 6, 6)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             zipcode.input(
                 "please enter zipcode (The zipcode must have a length of 6 characters\nThe first 4 chars must be numbers\nThe first number cant be 0 ): ")
             if not zipcode.isValid():
@@ -898,7 +958,12 @@ class db:
         # fullname validation
         fullnamenew = uginput('fullname', 5, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullnamenew.input("please enter fullname: ")
             if not fullnamenew.isValid():
                 logging(db, fullnamenew.value, 'tried to add a new client, fullname incorrect',
@@ -910,7 +975,12 @@ class db:
         # streetadress validation
         streetaddress = uginput('streetadress', 5, 40)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             streetaddress.input(
                 "please enter StreetAddress: (You must use a min of 5 and max of 40 characters in length\n First character must be a letter)")
             if not streetaddress.isValid():
@@ -923,7 +993,12 @@ class db:
         # HouseNumber validation
         HouseNumberNew = uginput('HouseNumber')
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             HouseNumberNew.input("please enter HouseNumber: ")
             if not HouseNumberNew.isValid():
                 logging(db, HouseNumberNew.value, 'tried to add a new client, fullname incorrect',
@@ -935,7 +1010,12 @@ class db:
         # checking zipcode
         zipcodeNew = uginput('zipcode')
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             zipcodeNew.input("please enter zipcode: ")
             if not zipcodeNew.isValid():
                 logging(db, zipcodeNew.value, 'tried to modify an client, zipcode incorrect',
@@ -949,7 +1029,12 @@ class db:
 
         emailaddress = uginput('email', 5, 255)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             emailaddress.input("please enter emailaddress: ")
             if not emailaddress.isValid():
                 logging(db, emailaddress.value, 'tried to modify a client, emailaddress incorrect',
@@ -962,7 +1047,12 @@ class db:
 
         mobilephone = uginput('email', 5, 255)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             mobilephone.input("please enter MobilePhone +31-6- (Must have a length of 8 digits): ")
             if not mobilephone.isValid():
                 logging(db, mobilephone.value, 'tried to add a client, mobilephone incorrect',
@@ -993,7 +1083,12 @@ class db:
     def delete_user(self, role):
         username = uginput('username', 5, 40)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             username.input("please enter username: ")
             if not username.isValid():
                 logging(db, username.value, 'tried to add a client, username incorrect',
@@ -1016,7 +1111,12 @@ class db:
         # oldpassword validation
         oldpassword = uginput('oldpassword', 8, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
 
             oldpassword.input("please enter old password: ")
             if not oldpassword.isValid():
@@ -1029,7 +1129,12 @@ class db:
             # validate new pasword
             newpassword = uginput('newpassword', 8, 30)
             check = False
+            count = 0
             while not check:
+                if count > 3:
+                    print('You entered 3 incorrect entries program will exit')
+                    return
+                count += 1
                 newpassword.input("please enter new password: ")
                 if not newpassword.isValid():
                     logging(db, newpassword.value, 'tried to change password, new password incorrect',
@@ -1041,7 +1146,12 @@ class db:
             # validate newpasswordrepeated
             newpasswordrepeated = uginput('newpasswordrepeated', 8, 30)
             check = False
+            count = 0
             while not check:
+                if count > 3:
+                    print('You entered 3 incorrect entries program will exit')
+                    return
+                count += 1
                 newpasswordrepeated.input("please reenter new password: ")
                 if not newpasswordrepeated.isValid():
                     logging(db, newpasswordrepeated.value, 'tried to change password, newpasswordrepeated incorrect',
@@ -1083,7 +1193,12 @@ class db:
 
         username = uginput('username', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             username.input("please enter username: ")
             if not username.isValid():
                 logging(db, username.value, 'tried to add a username for new advisor', 'values used are' + username.value,1)
@@ -1094,7 +1209,12 @@ class db:
 
         password = uginput('password', 8, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter password: ")
             if not password.isValid():
                 logging(db, username.value, 'tried to add a password for new advisor',
@@ -1106,7 +1226,12 @@ class db:
 
         fullname = uginput('fullname', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -1134,7 +1259,12 @@ class db:
         # validating oldusername
         oldusername = uginput('oldusername', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             oldusername.input("please enter the Username that you want to modify: ")
             if not oldusername.isValid():
                 logging(db, oldusername.value, 'tried to modify an advisor olduusername incorrect',
@@ -1146,7 +1276,12 @@ class db:
         # validating username
         username = uginput('username', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             username.input("please enter new username: ")
             if not username.isValid():
                 logging(db, username.value, 'tried to modify an advisor username incorrect',
@@ -1158,7 +1293,12 @@ class db:
         # validating password
         password = uginput('password', 8, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter new password: ")
             if not password.isValid():
                 logging(db, password.value, 'tried to modify a password for advisor',
@@ -1171,7 +1311,12 @@ class db:
         # validating fullname
         fullname = uginput('fullname', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -1206,7 +1351,12 @@ class db:
         # check advisor name
         advisorname = uginput('advisorname', 5, 12)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             advisorname.input("please enter Advisor username: ")
             if not advisorname.isValid():
                 logging(db, advisorname.value, 'tried to reset an advisor, username not found',
@@ -1218,7 +1368,12 @@ class db:
         # password validation
         password = uginput('password', 8, 30)
         check = False
+        count = 0
         while not check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter new Advisor password: ")
             if not password.isValid():
                 logging(db, password.value, 'tried to reset an advisor, username not found',
@@ -1241,7 +1396,12 @@ class db:
         # username validation
         username = uginput('username', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             username.input("please enter username: ")
             if not username.isValid():
                 logging(db, username.value, 'tried to add new admin, username was invalid',
@@ -1253,7 +1413,12 @@ class db:
         # password valdation
         password = uginput('password', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter password: ")
             if not password.isValid():
                 logging(db, password.value, 'tried to add new admin, password was invalid',
@@ -1265,7 +1430,12 @@ class db:
         # fullname validation
         fullname = uginput('fullname', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -1290,7 +1460,12 @@ class db:
         # validating oldusername
         oldusername = uginput('oldusername', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             oldusername.input("please enter the username that you want to modify: ")
             if not oldusername.isValid():
                 logging(db, oldusername.value, 'tried to modify an admin, username incorrect',
@@ -1302,7 +1477,12 @@ class db:
         # validating username
         username = uginput('username', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             username.input("please enter new username: ")
             if not username.isValid():
                 logging(db, username.value, 'tried to modify an admin, username incorrect',
@@ -1314,7 +1494,12 @@ class db:
         # validating password
         password = uginput('password', 8, 30)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter new password: ")
             if not password.isValid():
                 logging(db, username.value, 'tried to modify an admin, password incorrect',
@@ -1326,7 +1511,12 @@ class db:
         # validating fullname
         fullname = uginput('fullname', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             fullname.input(
                 "please enter fullname (You must use min 5 and max 30 characters in length\nFirst character must be a letter): ")
             if not fullname.isValid():
@@ -1361,7 +1551,12 @@ class db:
         # check admin name
         adminname = uginput('adminname', 5, 12)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             adminname.input("please enter admin username: ")
             if not adminname.isValid():
                 logging(db, adminname.value, 'tried to reset an admin, username not found',
@@ -1373,7 +1568,12 @@ class db:
         # password validation
         password = uginput('password', 8, 30)
         Check = False
+        count = 0
         while not Check:
+            if count > 3:
+                print('You entered 3 incorrect entries program will exit')
+                return
+            count += 1
             password.input("please enter new admin password: ")
             if not password.isValid():
                 logging(db, password.value, 'tried to reset an admin, password not found',
