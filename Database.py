@@ -885,7 +885,6 @@ class db:
                 {"fullname": encryption.encrypt(fullname.value), "HouseNumber": encryption.encrypt(housenumber.value),
                  "zipcode": encryption.encrypt(zipcode.value)})
             self.conn.commit()
-            print(self.cur.fetchone())
             print('client has been deleted')
             logging(db, self.user.username, 'client has been deleted',
                     'client name ' + fullname.value + ' ' + 'client house number ' + housenumber.value + ' ' + 'client zipcode ' + zipcode.value,
