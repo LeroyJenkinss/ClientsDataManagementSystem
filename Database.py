@@ -704,7 +704,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -722,7 +722,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -740,7 +740,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -757,7 +757,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -778,7 +778,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -796,7 +796,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -824,7 +824,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -842,7 +842,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -859,7 +859,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -901,7 +901,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -919,7 +919,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -936,7 +936,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -961,7 +961,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -978,7 +978,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -996,7 +996,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1013,7 +1013,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1032,7 +1032,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1050,7 +1050,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1086,7 +1086,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1114,7 +1114,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1132,7 +1132,7 @@ class db:
             check = False
             count = 0
             while not check:
-                if count > 3:
+                if count >= 3:
                     print('You entered 3 incorrect entries program will exit')
                     return
                 count += 1
@@ -1149,7 +1149,7 @@ class db:
             check = False
             count = 0
             while not check:
-                if count > 3:
+                if count >= 3:
                     print('You entered 3 incorrect entries program will exit')
                     return
                 count += 1
@@ -1196,7 +1196,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1212,7 +1212,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1229,7 +1229,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1262,7 +1262,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1287,7 +1287,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1304,7 +1304,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1322,7 +1322,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1362,7 +1362,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1379,7 +1379,7 @@ class db:
         check = False
         count = 0
         while not check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1407,7 +1407,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1424,7 +1424,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1441,7 +1441,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1470,7 +1470,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1495,7 +1495,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1512,7 +1512,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1529,7 +1529,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1569,7 +1569,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
@@ -1586,7 +1586,7 @@ class db:
         Check = False
         count = 0
         while not Check:
-            if count > 3:
+            if count >= 3:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
