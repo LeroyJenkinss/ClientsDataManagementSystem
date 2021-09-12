@@ -1288,7 +1288,15 @@ class db:
                         'values used are' + oldusername.value, 1)
                 print('old username was incorrect/or not found')
             else:
-                check = True
+                Check = True
+                self.cur.execute(
+                    "SELECT * FROM users WHERE username=:oldusername and admin=:Admin", \
+                    {"oldusername": encryption.encrypt(oldusername.value), "Admin":'3'})
+                user = self.cur.fetchone()
+                if user == None:
+                    print('User does not exist please try again.')
+                    Check = False
+
 
         # validating username
         username = uginput('username', 5, 12)
@@ -1490,8 +1498,8 @@ class db:
             else:
                 Check = True
                 self.cur.execute(
-                    "SELECT * FROM users WHERE username=:oldusername", \
-                    {"oldusername": encryption.encrypt(oldusername.value)})
+                    "SELECT * FROM users WHERE username=:oldusername and admin=:Admin", \
+                    {"oldusername": encryption.encrypt(oldusername.value), "Admin":'4'})
                 user = self.cur.fetchone()
                 if user == None:
                     print('User does not exist please try again.')
