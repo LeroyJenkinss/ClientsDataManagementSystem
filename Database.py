@@ -471,9 +471,10 @@ class db:
         logging(db, username.value, 'user logged in ', 'values used are ' + username.value, 0)
         # string concatenation
         # sql_statement = f"SELECT * from users WHERE username='{username}' AND password='{password}'"
-        sql_statement = f'SELECT * from users WHERE username="{encryption.encrypt(username.value)}" AND password="{encryption.encrypt(password.value)}"'
+        sql_statement = 'SELECT * from users WHERE username=:UserName AND password=:Password'
 
-        self.cur.execute(sql_statement)
+        self.cur.execute(sql_statement, {"UserName": encryption.encrypt(username.value),
+                                         "Password": encryption.encrypt(password.value)})
 
         loggedin_user = self.cur.fetchone()
         if not loggedin_user:  # An empty result evaluates to False.
@@ -573,7 +574,7 @@ class db:
                 print('\n\n\n\nWelcome')
                 heading = '▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄' + '\n' + \
                           '▍ ' + '\n' + \
-                          '▍ Username: ' + colored(self.loggedin_user, 'red') + '\n' + \
+                          '▍ Username: ' + colored(username.value, 'red') + '\n' + \
                           '▍ ' + '\n' + \
                           '▍ User type: ' + colored(user_type, 'red') + '\n' + \
                           '▍ ' + '\n' + \
