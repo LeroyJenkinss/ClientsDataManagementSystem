@@ -964,6 +964,7 @@ class db:
                 print('You entered 3 incorrect entries program will exit')
                 return
             count += 1
+            print('The following question will be regarding the adjustments')
             fullnamenew.input("please enter fullname: ")
             if not fullnamenew.isValid():
                 logging(db, fullnamenew.value, 'tried to add a new client, fullname incorrect',
