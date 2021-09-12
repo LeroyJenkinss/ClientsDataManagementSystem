@@ -1085,8 +1085,8 @@ class db:
         while not check:
             username.input("please enter username: ")
             if not username.isValid():
-                logging(db, username.value, 'tried to add a username for new advisor, values used are' + username.value,
-                        1)
+                logging(db, username.value, 'tried to add a username for new advisor', 'values used are' + username.value,1)
+
                 print('username,password or fullname is incorrect')
             else:
                 check = True
