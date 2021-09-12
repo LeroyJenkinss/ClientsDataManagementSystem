@@ -1271,14 +1271,14 @@ class db:
                         'values used are' + oldusername.value, 1)
                 print('old username was incorrect/or not found')
             else:
-                Check = True
+                check = True
                 self.cur.execute(
                     "SELECT * FROM users WHERE username=:oldusername and admin=:Admin", \
                     {"oldusername": encryption.encrypt(oldusername.value), "Admin":'3'})
                 user = self.cur.fetchone()
                 if user == None:
                     print('User does not exist please try again.')
-                    Check = False
+                    check = False
 
 
         # validating username
